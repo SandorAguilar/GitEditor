@@ -61,6 +61,9 @@ public class Controller {
      
        private JTextPane mainTextPane;
        private JScrollPane mainTextPaneScroll;
+       
+       private boolean fileAlreadySaved; // if the file has already been saved.
+       private String fileName; // the name of the file that's currently being worked on.
      
       
        public static void main(String[] args) {
@@ -69,6 +72,8 @@ public class Controller {
             Controller c = new Controller();
                 c.init();
                 c.display();  
+                c.fileName = "";
+                c.fileAlreadySaved = false;
             }
         }); 
        }
@@ -83,10 +88,10 @@ public class Controller {
     	   		attachListenersToComponents();
             frame.setSize(900, 700);
             frame.setVisible(true);
-             frame.setResizable(false);
-               frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-                       //timer = new Timer();
-           // timer.schedule(new Task(), 0, 5000);
+            frame.setResizable(false);
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            //timer = new Timer();
+            // timer.schedule(new Task(), 0, 5000);
        }
      
        private void layOutComponents() {
@@ -146,7 +151,7 @@ public class Controller {
         * Attaches the listeners.
         */
        private void attachListenersToComponents() {
-                  updateButton.addActionListener(new ActionListener() {
+               updateButton.addActionListener(new ActionListener() {
                @Override
                public void actionPerformed(ActionEvent event) {
                   String wordCount = Integer.toString(getWordCount());
@@ -155,18 +160,40 @@ public class Controller {
                }
            });
                   
-                  openButton.addActionListener(new ActionListener() {
-               @Override
-               public void actionPerformed(ActionEvent event) {
-                  int returnVal = fileChooser.showOpenDialog(frame);
-                  File file = null;
-                  if (returnVal == JFileChooser.APPROVE_OPTION) {
-                       file = fileChooser.getSelectedFile();
-                   }
-                  
-                  readFile(file);
-               }
-           });
+               openButton.addActionListener(new ActionListener() {
+	               @Override
+	               public void actionPerformed(ActionEvent event) {
+	                  int returnVal = -1;
+	                  File file = null;
+					try {
+						returnVal = fileChooser.showOpenDialog(frame);
+						if (returnVal == 0) {
+			                  if (returnVal == JFileChooser.APPROVE_OPTION) {
+			                       file = fileChooser.getSelectedFile();
+			                   }
+			                  readFile(file);
+		                  }
+					} catch (Exception e) {
+						//System.out.println("doh");
+					}
+	                  //System.out.println("returnVal: " + returnVal);
+	                  
+	               }
+               });
+               
+               saveButton.addActionListener(new ActionListener() {
+	               @Override
+	               public void actionPerformed(ActionEvent event) {
+
+	               }
+               });
+               
+               retrieveButton.addActionListener(new ActionListener() {
+	               @Override
+	               public void actionPerformed(ActionEvent event) {
+
+	               }
+               });
        }
       
        /**
@@ -186,30 +213,29 @@ public class Controller {
                                  
                   for (int i = 0; i < text.length() - 1; i++) {
  
-                                 char s1 = text.charAt(i);
-                                char s2 = text.charAt(i+1);
+                	  		char s1 = text.charAt(i);
+                	  		char s2 = text.charAt(i+1);
                                  
                                  //System.out.println(i + " -> 1." +  Character.toString(s1) + ":" + (int)s1 +
                                              //               " 2." +  Character.toString(s2) + ":" + (int)s2);
                                  
+                        if (((int)s1 != 13 || s1 != ' ') && (s2 == ' ' || i+2 == text.length() || (int)s2 == 13)) {
+                                  count++;
+                        }
                                  
-                                 if (((int)s1 != 13 || s1 != ' ') && (s2 == ' ' || i+2 == text.length() || (int)s2 == 13)) {
-                                                count++;
-                                 }
-                                 
-                                 if ((int)s2 == 13 && s1 != ' ') {
-                                                count++;
-                                 }
+                        if ((int)s2 == 13 && s1 != ' ') {
+                                  count++;
+                        }
   
-                                 else  if (s1 == 13 && s2 == 10) {
-                                                count--;
-                                 }
+                        else  if (s1 == 13 && s2 == 10) {
+                                  count--;
+                       }
                   }
                   //System.out.println("count: " + count);
                   //System.out.println("----------------------");
-                  String wordCount = Integer.toString(count);
-           wordCountResultLabel.setText(wordCount);
-                  return count;
+            String wordCount = Integer.toString(count);
+            	wordCountResultLabel.setText(wordCount);
+            return count;
        }
        
        /**
@@ -238,8 +264,25 @@ public class Controller {
                 	  		e.printStackTrace();
                   }             
        }
-              
-               class Task extends TimerTask {
+             
+       /**
+        * 
+        * @return - if the current file has been saved already.
+        */
+       public boolean isFileAlreadySaved() {
+        		return fileAlreadySaved;
+       }
+
+       /**
+        * 
+        * @param fileAlreadySaved - setting if the file has already
+        * been saved. 
+        */
+       public void setFileAlreadySaved(boolean fileAlreadySaved) {
+    	   		this.fileAlreadySaved = fileAlreadySaved;
+	}
+
+			class Task extends TimerTask {
             	   		@Override
                     public void run() {
             	   			// TODO Auto-generated method stub
