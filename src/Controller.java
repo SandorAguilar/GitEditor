@@ -43,12 +43,12 @@ public class Controller {
        private JFrame frame;
        private JPanel menuPanel;
        private JPanel statPanel;
+       private JPanel spellCheckPanel;
      
        private JButton openButton;
        private JButton saveButton;
        private JButton retrieveButton;
-     
-       
+       private JButton spellCheckButton;
        private JButton updateButton;     
       
        private JFileChooser fileChooser;
@@ -60,7 +60,9 @@ public class Controller {
        private JLabel totalCommitResultLabel;
      
        private JTextPane mainTextPane;
+       private JTextPane spellCheckPane;
        private JScrollPane mainTextPaneScroll;
+       private JScrollPane spellCheckPaneScroll;
        
        private boolean fileAlreadySaved; // if the file has already been saved.
        private String fileName; // the name of the file that's currently being worked on.
@@ -99,8 +101,11 @@ public class Controller {
              frame = new JFrame("GitEditor");
              menuPanel = new JPanel();
              statPanel = new JPanel();
+             spellCheckPanel = new JPanel();
              menuPanel.setLayout(new GridLayout(1,7));
              statPanel.setLayout(new GridLayout(1,5));
+             //spellCheckPanel.setLayout(new GridLayout(2,1));
+             spellCheckPanel.setLayout(new BorderLayout());
             
              fileChooser = new JFileChooser();
              FileNameExtensionFilter filter = new FileNameExtensionFilter("TEXT FILES", "txt", "text");
@@ -111,6 +116,9 @@ public class Controller {
              saveButton = new JButton("save");
              retrieveButton = new JButton("retrieve");
              updateButton = new JButton("update");
+             spellCheckButton = new JButton("spell check");
+             
+             spellCheckButton.setPreferredSize(new Dimension(10,30));
  
            
             menuPanel.add(openButton);
@@ -118,13 +126,19 @@ public class Controller {
  
              menuPanel.add(retrieveButton);
  
-             mainTextPane = new JTextPane() ;
+             mainTextPane = new JTextPane();
+             spellCheckPane = new JTextPane();
+             
+             //spellCheckPane.setSize(new Dimension(700,300));
+             spellCheckPane.setPreferredSize(new Dimension(100,100));
  
                        
              mainTextPane.setEditable(true);
  
       
              mainTextPaneScroll = new JScrollPane(mainTextPane);
+             spellCheckPaneScroll = new JScrollPane(spellCheckPane);
+             spellCheckPaneScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
              mainTextPaneScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
            
              wordCountLabel = new JLabel("  Word Count:  ", SwingConstants.RIGHT);
@@ -138,12 +152,21 @@ public class Controller {
              statPanel.add(wordCountResultLabel);
              statPanel.add(totalCommitsLabel);
              statPanel.add(totalCommitResultLabel);
- 
              statPanel.add(updateButton);
+             
+             //spellCheckPanel.add(spellCheckButton);
+             //spellCheckPanel.add(spellCheckPane);
+             
+             spellCheckPanel.add(BorderLayout.NORTH, spellCheckButton);
+             //spellCheckPanel.add(BorderLayout.CENTER, spellCheckPane);
+             //spellCheckPanel.add(BorderLayout.EAST, spellCheckPaneScroll);
+             spellCheckPanel.add(BorderLayout.CENTER, spellCheckPaneScroll);
             
-             frame.add(BorderLayout.EAST, mainTextPaneScroll);
+             //frame.add(BorderLayout.EAST, mainTextPaneScroll);
              frame.add(BorderLayout.NORTH, menuPanel);
-             frame.add(BorderLayout.SOUTH, statPanel);
+             //frame.add(BorderLayout.SOUTH, statPanel);
+             //frame.add(BorderLayout.WEST, spellCheckPanel);
+             frame.add(BorderLayout.SOUTH, spellCheckPanel);
              frame.add(BorderLayout.CENTER, mainTextPaneScroll);
        }
        
@@ -172,6 +195,7 @@ public class Controller {
 			                       file = fileChooser.getSelectedFile();
 			                   }
 			                  readFile(file);
+			                  setFileAlreadySaved(true);
 		                  }
 					} catch (Exception e) {
 						//System.out.println("doh");
@@ -184,14 +208,21 @@ public class Controller {
                saveButton.addActionListener(new ActionListener() {
 	               @Override
 	               public void actionPerformed(ActionEvent event) {
-
+	            	   // TODO
 	               }
                });
                
                retrieveButton.addActionListener(new ActionListener() {
 	               @Override
 	               public void actionPerformed(ActionEvent event) {
-
+	            	   // TODO
+	               }
+               });
+               
+               spellCheckButton.addActionListener(new ActionListener() {
+	               @Override
+	               public void actionPerformed(ActionEvent event) {
+	            	   // TODO
 	               }
                });
        }
