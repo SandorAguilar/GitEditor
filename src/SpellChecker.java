@@ -1,5 +1,3 @@
-package hw6;
-
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -11,6 +9,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.PriorityQueue;
 import java.util.Set;
 
 /**
@@ -19,21 +18,16 @@ import java.util.Set;
  *
  */
 public class SpellChecker {
-
-//	Store the dictionary
-//	Two purposes: 
-//			1) Check if word exists in dictionary
-//			2) Come up with suggestions for words
-	
-//	Option 1: store in array sorted, do binary search
 	
 	private Path dict_path = Paths.get("/Users/Eitan/Desktop/upenn/cit594/hw6/words.txt");
 	private Set<String> dict;
+	private int numSuggestions = 3;
 	
 	public static void main(String[] args){
 		SpellChecker sc = new SpellChecker();
-		String x = "So this is a HUGE paragrph with .all sorts abb of valid and glasses invalid words. \"SO exciting\" one may, or may not, say.";
+		String x = "So this cd is a HUGE paragrph with .all sorts abb of valid and glasses invalid words. \"SO exciting\" one may, or may not, say.";
 		System.out.println(sc.checkDocument(x));
+		sc.recommendedWords("hl");
 	}
 	
 	/**
@@ -44,8 +38,47 @@ public class SpellChecker {
 		readDict();
 	}
 	
+	private static int editDistance(String word1, String word2){
+//		TODO implement method
+		return (word2.length() + 5);
+	}
+	
+	/**
+	 * Returns the top numSuggestions closest words to the wrong word 
+	 * @param wrongWord
+	 * @return
+	 */
 	public List<String> recommendedWords(String wrongWord){
-		return null;
+//		For each word in dict, compute edit-distance value from wrongWord
+//		Store in heap the top k elements
+//		Return those elements
+		List<String> suggestions = new ArrayList<String>();
+		PriorityQueue<Tuple> minHeap = new PriorityQueue<Tuple>(numSuggestions);
+		
+		minHeap.add(new Tuple("blank", Integer.MAX_VALUE));
+		
+		for (String w : dict){
+			
+			if (minHeap.peek().getValue() == 1 && minHeap.size() == numSuggestions) break;
+			
+			int val = editDistance(wrongWord, w);
+			
+			if (minHeap.size() < numSuggestions){
+				minHeap.add(new Tuple(w, val));
+				continue;
+			}
+			
+			if (val < minHeap.peek().getValue()){
+				minHeap.remove();
+				minHeap.add(new Tuple(w, val));
+			}
+		}
+		
+		System.out.println(minHeap);
+		for (Tuple t : minHeap){
+			suggestions.add(t.getStr());
+		}
+		return suggestions;
 	}
 	
 	
