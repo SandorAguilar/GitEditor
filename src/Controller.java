@@ -207,6 +207,7 @@ public class Controller {
 						readFile(file);
 						setFileAlreadySaved(true);
 						workingFile = file.getAbsoluteFile();
+						gitFile = new File(gitPath + "//" + fileChooser.getSelectedFile().getName());
 						previousSave = mainTextPane.getText();
 					}
 				} catch (Exception e) {
@@ -279,6 +280,7 @@ public class Controller {
 						}
 
 						commitMessage = JOptionPane.showInputDialog(frame, "commit message:", null);
+						System.out.print("commitMessage: " + commitMessage);
 						previousSave = mainTextPane.getText();
 					}
 				}
