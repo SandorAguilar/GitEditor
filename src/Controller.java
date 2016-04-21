@@ -30,6 +30,7 @@ public class Controller {
 	private TimerTask task;
 
 	private File workingFile;
+	private File gitFile;
 
 	private JFrame frame;
 	private JPanel menuPanel;
@@ -62,6 +63,7 @@ public class Controller {
 	private String previousSave;
 	private String homeDir;
 	private String gitPath;
+	private String gitFileString;
 
 
 	public static void main(String[] args) {
@@ -79,13 +81,15 @@ public class Controller {
 	public void init() {
 		view = new View();    
 		homeDir = System.getProperty("user.home");
-		File file = new File(homeDir + "\\.git");
+		File file = new File(homeDir + "//.gitEditor");
 		//System.out.println(homeDir);
+		gitPath = file.getAbsolutePath();
+		//System.out.println(gitPath);
 		if (!file.exists()) {
             if (file.mkdir()) {
-                System.out.println("Directory is created!");
+                //System.out.println("Directory is created!");
             } else {
-                System.out.println("Failed to create directory!");
+                //System.out.println("Failed to create directory!");
             }
         }
 	}
@@ -222,6 +226,7 @@ public class Controller {
 						String filePath = fileChooser.getSelectedFile().getAbsolutePath();
 						//System.out.println(file.getName());
 						File savedFile = new File(filePath + ".txt");
+						File gitSavedFile = new File(gitPath + "//" + fileChooser.getSelectedFile().getName() + ".txt");
 
 						//System.out.println(savedFile.getName());
 
@@ -239,24 +244,35 @@ public class Controller {
 						setFileAlreadySaved(true);
 
 						FileWriter writer;
+						FileWriter gitWriter;
 						try {
 							writer = new FileWriter(savedFile);
 							writer.write(mainTextPane.getText());
 							writer.close();
+							
+							gitWriter = new FileWriter(gitSavedFile);
+							gitWriter.write(mainTextPane.getText());
+							gitWriter.close();
 						} catch (IOException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
 						workingFile = savedFile;
+						gitFile = gitSavedFile;
 						previousSave = mainTextPane.getText();
 					}
 				} else {
 					if (!previousSave.equals(mainTextPane.getText())) {
 						FileWriter writer;
+						FileWriter gitWriter;
 						try {
 							writer = new FileWriter(workingFile);
 							writer.write(mainTextPane.getText());
 							writer.close();
+							
+							gitWriter = new FileWriter(gitFile);
+							gitWriter.write(mainTextPane.getText());
+							gitWriter.close();
 						} catch (IOException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
