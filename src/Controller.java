@@ -3,6 +3,8 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -21,11 +23,12 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.WindowConstants;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 public class Controller {
 
-	private View view;
+	//private View view;
 	private Timer timer;
 	private TimerTask task;
 
@@ -36,6 +39,7 @@ public class Controller {
 	private JPanel menuPanel;
 	private JPanel statPanel;
 	private JPanel spellCheckPanel;
+	private JPanel spellCheckButtonPanel;
 
 	private JButton openButton;
 	private JButton saveButton;
@@ -47,6 +51,9 @@ public class Controller {
 
 	private JLabel wordCountLabel;
 	private JLabel totalCommitsLabel;
+	
+	private JLabel blank1;
+	private JLabel blank2;
 
 	private JLabel wordCountResultLabel;
 	private JLabel totalCommitResultLabel;
@@ -79,18 +86,12 @@ public class Controller {
 	}
 
 	public void init() {
-		view = new View();    
+		//view = new View();    
 		homeDir = System.getProperty("user.home");
 		File file = new File(homeDir + "//.gitEditor");
-		//System.out.println(homeDir);
 		gitPath = file.getAbsolutePath();
-		//System.out.println(gitPath);
 		if (!file.exists()) {
-            if (file.mkdir()) {
-                //System.out.println("Directory is created!");
-            } else {
-                //System.out.println("Failed to create directory!");
-            }
+			file.mkdir();     
         }
 	}
 
@@ -101,6 +102,7 @@ public class Controller {
 		frame.setVisible(true);
 		frame.setResizable(false);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		//timer = new Timer();
 		// timer.schedule(new Task(), 0, 5000);
 	}
@@ -111,14 +113,17 @@ public class Controller {
 		menuPanel = new JPanel();
 		statPanel = new JPanel();
 		spellCheckPanel = new JPanel();
+		spellCheckButtonPanel = new JPanel();
 		menuPanel.setLayout(new GridLayout(1,7));
 		statPanel.setLayout(new GridLayout(1,5));
-		//spellCheckPanel.setLayout(new GridLayout(2,1));
 		spellCheckPanel.setLayout(new BorderLayout());
 
 		fileChooser = new JFileChooser();
 		FileNameExtensionFilter filter = new FileNameExtensionFilter("TEXT FILES", "txt", "text");
 		fileChooser.setFileFilter(filter);
+		
+		blank1 = new JLabel("");
+		blank2 = new JLabel("");
 
 
 		openButton = new JButton("open");
@@ -141,9 +146,7 @@ public class Controller {
 		//spellCheckPane.setSize(new Dimension(700,300));
 		spellCheckPane.setPreferredSize(new Dimension(100,100));
 
-
 		mainTextPane.setEditable(true);
-
 
 		mainTextPaneScroll = new JScrollPane(mainTextPane);
 		spellCheckPaneScroll = new JScrollPane(spellCheckPane);
@@ -165,7 +168,12 @@ public class Controller {
 
 		//spellCheckPanel.add(spellCheckButton);
 		//spellCheckPanel.add(spellCheckPane);
+		
+		//spellCheckButtonPanel.add(blank1);
+		//spellCheckButtonPanel.add(spellCheckButton);
+		//spellCheckButtonPanel.add(blank2);
 
+		//spellCheckPanel.add(BorderLayout.NORTH, spellCheckButtonPanel);
 		spellCheckPanel.add(BorderLayout.NORTH, spellCheckButton);
 		//spellCheckPanel.add(BorderLayout.CENTER, spellCheckPane);
 		//spellCheckPanel.add(BorderLayout.EAST, spellCheckPaneScroll);
@@ -180,9 +188,31 @@ public class Controller {
 	}
 
 	/**
-	 * Attaches the listeners.
+	 * Attaches the action listeners.
 	 */
 	private void attachListenersToComponents() {
+		
+		frame.addWindowListener(new WindowAdapter() {
+			@Override
+            public void windowClosing(WindowEvent e)
+            {
+                //System.out.println("Closed");
+				if (isFileAlreadySaved()) {
+					int returnVal = JOptionPane.showConfirmDialog(frame, "save message before closing?");
+					//System.out.println(returnVal);
+					if (returnVal == 0) {
+						saveButton.doClick();
+						e.getWindow().dispose();
+					}
+					else if (returnVal == 1) {
+						e.getWindow().dispose();
+					} 
+				} else {
+					e.getWindow().dispose();
+				}
+            }
+		});
+		
 		updateButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent event) {
