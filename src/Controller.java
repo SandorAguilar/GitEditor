@@ -50,15 +50,9 @@ public class Controller {
 	private JButton updateButton;     
 
 	private JFileChooser fileChooser;
-
-	private JLabel wordCountLabel;
-	private JLabel totalCommitsLabel;
 	
 	private JLabel blank1;
 	private JLabel blank2;
-
-	private JLabel wordCountResultLabel;
-	private JLabel totalCommitResultLabel;
 	
 	private JLabel retrieveLabel;
 
@@ -122,6 +116,7 @@ public class Controller {
 		retrievePanel = new JPanel();
 		menuPanel.setLayout(new GridLayout(1,7));
 		statPanel.setLayout(new GridLayout(1,5));
+		spellCheckButtonPanel.setLayout(new GridLayout(1,3));
 		spellCheckPanel.setLayout(new BorderLayout());
 		retrievePanel.setLayout(new BorderLayout());
 		
@@ -141,6 +136,10 @@ public class Controller {
 		updateButton = new JButton("update");
 		spellCheckButton = new JButton("spell check");
 		
+		spellCheckButtonPanel.add(blank1);
+		spellCheckButtonPanel.add(spellCheckButton);
+		spellCheckButtonPanel.add(blank2);
+		
 		ArrayList<String> commentList = new ArrayList<>();
 		ArrayList<Long> timeList = new ArrayList<>();
 		
@@ -153,8 +152,6 @@ public class Controller {
 		timeList.add(System.currentTimeMillis());
 		
 		updateGitList(commentList, timeList);
-		
-		//gitCommitList = new JComboBox();
 
 		spellCheckButton.setPreferredSize(new Dimension(10,30));
 
@@ -162,9 +159,6 @@ public class Controller {
 		menuPanel.add(openButton);
 		menuPanel.add(saveButton);
 		menuPanel.add(retrievePanel);
-
-		//menuPanel.add(retrieveButton);
-		//menuPanel.add(gitCommitList);
 		
 		mainTextPane = new JTextPane();
 		spellCheckPane = new JTextPane();
@@ -182,7 +176,7 @@ public class Controller {
 		retrievePanel.add(BorderLayout.NORTH, retrieveLabel);
 		retrievePanel.add(BorderLayout.CENTER, gitCommitList);
 
-		spellCheckPanel.add(BorderLayout.NORTH, spellCheckButton);
+		spellCheckPanel.add(BorderLayout.NORTH, spellCheckButtonPanel);
 		spellCheckPanel.add(BorderLayout.CENTER, spellCheckPaneScroll);
 
 		frame.add(BorderLayout.NORTH, menuPanel);
@@ -199,11 +193,9 @@ public class Controller {
 			@Override
             public void windowClosing(WindowEvent e)
             {
-                //System.out.println("Closed");
 				if ((isFileAlreadySaved() && !mainTextPane.getText().equals(previousSave))
 						|| (!isFileAlreadySaved() && mainTextPane.getText().length() > 0)) {
 					int returnVal = JOptionPane.showConfirmDialog(frame, "save message before closing?");
-					//System.out.println(returnVal);
 					if (returnVal == 0) {
 						saveButton.doClick();
 						e.getWindow().dispose();
@@ -227,7 +219,6 @@ public class Controller {
 					if (returnVal == 0) {
 						if (returnVal == JFileChooser.APPROVE_OPTION) {
 							file = fileChooser.getSelectedFile();
-							//System.out.println(file.getName());
 							frame.setTitle("GitEditor - " + file.getName());
 						}
 						readFile(file);
@@ -237,10 +228,8 @@ public class Controller {
 						previousSave = mainTextPane.getText();
 					}
 				} catch (Exception e) {
-					//System.out.println("doh");
+					
 				}
-				//System.out.println("returnVal: " + returnVal);
-
 			}
 		});
 
@@ -249,20 +238,14 @@ public class Controller {
 			public void actionPerformed(ActionEvent event) {
 				if (!isFileAlreadySaved()) {
 					if (fileChooser.showSaveDialog(frame) == JFileChooser.APPROVE_OPTION) {
-						//File file = fileChooser.getSelectedFile();
+						
 						String filePath = fileChooser.getSelectedFile().getAbsolutePath();
-						//System.out.println(file.getName());
+						
 						File savedFile = new File(filePath + ".txt");
 						File gitSavedFile = new File(gitPath + "//" + fileChooser.getSelectedFile().getName() + ".txt");
 
-						//System.out.println(savedFile.getName());
-
 						try {
-							if (savedFile.createNewFile()){
-								//System.out.println("File is created!");
-							}else{
-								//System.out.println("File already exists.");
-							}
+							savedFile.createNewFile();							
 						} catch (IOException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
@@ -318,7 +301,8 @@ public class Controller {
 		gitCommitList.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent event) {
-				
+				String commit = (String)gitCommitList.getSelectedItem();
+				System.out.println(commit);
 			}
 		});
 
@@ -330,13 +314,17 @@ public class Controller {
 		});
 	}
 
+	/**
+	 * 
+	 * @param commit
+	 * @param time
+	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void updateGitList(ArrayList<String> commit, ArrayList<Long> time) {
 		if (gitCommitList != null) {
 			gitCommitList = null;
 		}
-		
-		
+			
 		toDisplay = new String[commit.size() + 1];
 		
 		toDisplay[0] = "";
@@ -344,7 +332,7 @@ public class Controller {
 		for (int i = 0; i < commit.size(); i++) {
 			String message = commit.get(i) + " - " + convertLongToDate(time.get(i));
 			toDisplay[i+1] = message;
-			System.out.println(toDisplay[i]);
+			//System.out.println(toDisplay[i]);
 		}
 		
 		gitCommitList = new JComboBox(toDisplay);
@@ -397,9 +385,9 @@ public class Controller {
 	}
 	
 	/**
-	 * 
-	 * @param time
-	 * @return
+	 * Converts a time in long to a readable string format.
+	 * @param time - the long we want to convert.
+	 * @return - the time as a string so its in a readable format.
 	 */
 	public String convertLongToDate(Long time) {
 		Date date = new Date(time);
