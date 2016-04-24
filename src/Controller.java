@@ -10,10 +10,15 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.Format;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -28,10 +33,6 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 public class Controller {
 
-	//private View view;
-	private Timer timer;
-	private TimerTask task;
-
 	private File workingFile;
 	private File gitFile;
 
@@ -40,6 +41,7 @@ public class Controller {
 	private JPanel statPanel;
 	private JPanel spellCheckPanel;
 	private JPanel spellCheckButtonPanel;
+	private JPanel retrievePanel;
 
 	private JButton openButton;
 	private JButton saveButton;
@@ -57,6 +59,8 @@ public class Controller {
 
 	private JLabel wordCountResultLabel;
 	private JLabel totalCommitResultLabel;
+	
+	private JLabel retrieveLabel;
 
 	private JTextPane mainTextPane;
 	private JTextPane spellCheckPane;
@@ -71,6 +75,9 @@ public class Controller {
 	private String homeDir;
 	private String gitPath;
 	private String gitFileString;
+	private String[] toDisplay;
+	
+	private JComboBox gitCommitList;
 
 
 	public static void main(String[] args) {
@@ -103,8 +110,6 @@ public class Controller {
 		frame.setResizable(false);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-		//timer = new Timer();
-		// timer.schedule(new Task(), 0, 5000);
 	}
 
 	private void layOutComponents() {
@@ -114,9 +119,12 @@ public class Controller {
 		statPanel = new JPanel();
 		spellCheckPanel = new JPanel();
 		spellCheckButtonPanel = new JPanel();
+		retrievePanel = new JPanel();
 		menuPanel.setLayout(new GridLayout(1,7));
 		statPanel.setLayout(new GridLayout(1,5));
 		spellCheckPanel.setLayout(new BorderLayout());
+		retrievePanel.setLayout(new BorderLayout());
+		
 
 		fileChooser = new JFileChooser();
 		FileNameExtensionFilter filter = new FileNameExtensionFilter("TEXT FILES", "txt", "text");
@@ -124,26 +132,43 @@ public class Controller {
 		
 		blank1 = new JLabel("");
 		blank2 = new JLabel("");
-
+		
+		retrieveLabel = new JLabel("pick previous commit", SwingConstants.CENTER);
 
 		openButton = new JButton("open");
 		saveButton = new JButton("save");
 		retrieveButton = new JButton("retrieve");
 		updateButton = new JButton("update");
 		spellCheckButton = new JButton("spell check");
+		
+		ArrayList<String> commentList = new ArrayList<>();
+		ArrayList<Long> timeList = new ArrayList<>();
+		
+		commentList.add("initial commit");
+		commentList.add("implemented gui");
+		commentList.add("refactored the main class");
+		
+		timeList.add(System.currentTimeMillis());
+		timeList.add(System.currentTimeMillis());
+		timeList.add(System.currentTimeMillis());
+		
+		updateGitList(commentList, timeList);
+		
+		//gitCommitList = new JComboBox();
 
 		spellCheckButton.setPreferredSize(new Dimension(10,30));
 
 
 		menuPanel.add(openButton);
 		menuPanel.add(saveButton);
+		menuPanel.add(retrievePanel);
 
-		menuPanel.add(retrieveButton);
-
+		//menuPanel.add(retrieveButton);
+		//menuPanel.add(gitCommitList);
+		
 		mainTextPane = new JTextPane();
 		spellCheckPane = new JTextPane();
 
-		//spellCheckPane.setSize(new Dimension(700,300));
 		spellCheckPane.setPreferredSize(new Dimension(100,100));
 
 		mainTextPane.setEditable(true);
@@ -153,36 +178,14 @@ public class Controller {
 		spellCheckPaneScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 		mainTextPaneScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 
-		wordCountLabel = new JLabel("  Word Count:  ", SwingConstants.RIGHT);
-		totalCommitsLabel = new JLabel("  Total Commits:  ", SwingConstants.RIGHT);
-
-
-		wordCountResultLabel = new JLabel("", SwingConstants.LEFT);
-		totalCommitResultLabel = new JLabel("", SwingConstants.LEFT);
-
-		statPanel.add(wordCountLabel);
-		statPanel.add(wordCountResultLabel);
-		statPanel.add(totalCommitsLabel);
-		statPanel.add(totalCommitResultLabel);
-		statPanel.add(updateButton);
-
-		//spellCheckPanel.add(spellCheckButton);
-		//spellCheckPanel.add(spellCheckPane);
 		
-		//spellCheckButtonPanel.add(blank1);
-		//spellCheckButtonPanel.add(spellCheckButton);
-		//spellCheckButtonPanel.add(blank2);
+		retrievePanel.add(BorderLayout.NORTH, retrieveLabel);
+		retrievePanel.add(BorderLayout.CENTER, gitCommitList);
 
-		//spellCheckPanel.add(BorderLayout.NORTH, spellCheckButtonPanel);
 		spellCheckPanel.add(BorderLayout.NORTH, spellCheckButton);
-		//spellCheckPanel.add(BorderLayout.CENTER, spellCheckPane);
-		//spellCheckPanel.add(BorderLayout.EAST, spellCheckPaneScroll);
 		spellCheckPanel.add(BorderLayout.CENTER, spellCheckPaneScroll);
 
-		//frame.add(BorderLayout.EAST, mainTextPaneScroll);
 		frame.add(BorderLayout.NORTH, menuPanel);
-		//frame.add(BorderLayout.SOUTH, statPanel);
-		//frame.add(BorderLayout.WEST, spellCheckPanel);
 		frame.add(BorderLayout.SOUTH, spellCheckPanel);
 		frame.add(BorderLayout.CENTER, mainTextPaneScroll);
 	}
@@ -197,7 +200,8 @@ public class Controller {
             public void windowClosing(WindowEvent e)
             {
                 //System.out.println("Closed");
-				if (isFileAlreadySaved()) {
+				if ((isFileAlreadySaved() && !mainTextPane.getText().equals(previousSave))
+						|| (!isFileAlreadySaved() && mainTextPane.getText().length() > 0)) {
 					int returnVal = JOptionPane.showConfirmDialog(frame, "save message before closing?");
 					//System.out.println(returnVal);
 					if (returnVal == 0) {
@@ -211,14 +215,6 @@ public class Controller {
 					e.getWindow().dispose();
 				}
             }
-		});
-		
-		updateButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent event) {
-				String wordCount = Integer.toString(getWordCount());
-				wordCountResultLabel.setText(wordCount); 
-			}
 		});
 
 		openButton.addActionListener(new ActionListener() {
@@ -291,6 +287,7 @@ public class Controller {
 						workingFile = savedFile;
 						gitFile = gitSavedFile;
 						previousSave = mainTextPane.getText();
+						frame.setTitle("GitEditor - " + workingFile.getName());
 					}
 				} else {
 					if (!previousSave.equals(mainTextPane.getText())) {
@@ -317,10 +314,11 @@ public class Controller {
 			}
 		});
 
-		retrieveButton.addActionListener(new ActionListener() {
+		//retrieveButton.addActionListener(new ActionListener() {
+		gitCommitList.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent event) {
-				// TODO
+				
 			}
 		});
 
@@ -332,46 +330,26 @@ public class Controller {
 		});
 	}
 
-	/**
-	 * Counts the number of words that are currently in the main text area.
-	 * @return - the number of words.
-	 */
-	public int getWordCount() {
-		int count = 0;
-
-		String text = mainTextPane.getText();
-
-		//System.out.println("textLength: " + text.length());
-
-		if (text.length() == 0 || text == null) {
-			return 0;
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public void updateGitList(ArrayList<String> commit, ArrayList<Long> time) {
+		if (gitCommitList != null) {
+			gitCommitList = null;
 		}
-
-		for (int i = 0; i < text.length() - 1; i++) {
-
-			char s1 = text.charAt(i);
-			char s2 = text.charAt(i+1);
-
-			//System.out.println(i + " -> 1." +  Character.toString(s1) + ":" + (int)s1 +
-			//               " 2." +  Character.toString(s2) + ":" + (int)s2);
-
-			if (((int)s1 != 13 || s1 != ' ') && (s2 == ' ' || i+2 == text.length() || (int)s2 == 13)) {
-				count++;
-			}
-
-			if ((int)s2 == 13 && s1 != ' ') {
-				count++;
-			}
-
-			else  if (s1 == 13 && s2 == 10) {
-				count--;
-			}
+		
+		
+		toDisplay = new String[commit.size() + 1];
+		
+		toDisplay[0] = "";
+		
+		for (int i = 0; i < commit.size(); i++) {
+			String message = commit.get(i) + " - " + convertLongToDate(time.get(i));
+			toDisplay[i+1] = message;
+			System.out.println(toDisplay[i]);
 		}
-		//System.out.println("count: " + count);
-		//System.out.println("----------------------");
-		String wordCount = Integer.toString(count);
-		wordCountResultLabel.setText(wordCount);
-		return count;
+		
+		gitCommitList = new JComboBox(toDisplay);
+		
+		//JComboBox list = new JComboBox(toDisplay);	
 	}
 
 	/**
@@ -417,14 +395,17 @@ public class Controller {
 	public void setFileAlreadySaved(boolean fileAlreadySaved) {
 		this.fileAlreadySaved = fileAlreadySaved;
 	}
-
-	class Task extends TimerTask {
-		@Override
-		public void run() {
-			// TODO Auto-generated method stub
-			if (mainTextPane.getText().length() > 0) {
-				getWordCount();
-			}
-		}             
+	
+	/**
+	 * 
+	 * @param time
+	 * @return
+	 */
+	public String convertLongToDate(Long time) {
+		Date date = new Date(time);
+		Format format = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+	    //Format format = new SimpleDateFormat("yyyy MM dd HH:mm:ss");
+		//System.out.println(format.format(date));
+	    return format.format(date);
 	}
 }
