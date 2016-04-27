@@ -1,4 +1,5 @@
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -15,6 +16,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
@@ -75,7 +77,7 @@ public class Controller {
 	private String gitFileString;
 	private String[] toDisplay;
 	
-	private JComboBox gitCommitList;
+	private JComboBox<Object> gitCommitList;
 	
 	GitDatabase database;
 
@@ -150,7 +152,7 @@ public class Controller {
 		blank1 = new JLabel("");
 		blank2 = new JLabel("");
 		
-		retrieveLabel = new JLabel("pick previous commit", SwingConstants.CENTER);
+		retrieveLabel = new JLabel("pick from 10 most recent commits", SwingConstants.CENTER);
 
 		openButton = new JButton("open");
 		saveButton = new JButton("save");
@@ -165,13 +167,13 @@ public class Controller {
 		ArrayList<String> commentList = new ArrayList<>();
 		ArrayList<Long> timeList = new ArrayList<>();
 		
-		commentList.add("initial commit");
-		commentList.add("implemented gui");
-		commentList.add("refactored the main class");
+		commentList.add("");
+		//commentList.add("implemented gui");
+		//commentList.add("refactored the main class");
 		
 		timeList.add(System.currentTimeMillis());
-		timeList.add(System.currentTimeMillis());
-		timeList.add(System.currentTimeMillis());
+		//timeList.add(System.currentTimeMillis());
+		//timeList.add(System.currentTimeMillis());
 		
 		updateGitList(commentList, timeList);
 
@@ -321,12 +323,16 @@ public class Controller {
 						commitMessage = JOptionPane.showInputDialog(frame, "commit message:", null);
 						//System.out.print("commitMessage: " + commitMessage);
 						previousSave = mainTextPane.getText();
+						database.save(mainTextPane.getText(), commitMessage);
 					}
+					// updating retrieval list
+					updateArrayListToArray(database.retrieve());
 				}
 			}
 		});
 
 		//retrieveButton.addActionListener(new ActionListener() {
+		// for retrieving 10 previous commits
 		gitCommitList.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent event) {
@@ -364,6 +370,8 @@ public class Controller {
 			toDisplay[i+1] = message;
 			//System.out.println(toDisplay[i]);
 		}
+		
+
 		
 		gitCommitList = new JComboBox(toDisplay);
 		
@@ -408,6 +416,45 @@ public class Controller {
 	    //Format format = new SimpleDateFormat("yyyy MM dd HH:mm:ss");
 		//System.out.println(format.format(date));
 	    return format.format(date);
+	}
+	
+	public void updateArrayListToArray(ArrayList<Commit> commit) {
+		//System.out.println("commit size: " + commit.size());
+		if(toDisplay != null) {
+			toDisplay = null;
+		}
+		
+		toDisplay = new String[commit.size() + 1];
+		
+		String[] commitsToDisplay = new String[commit.size() + 1];
+		
+		toDisplay[0] = "";
+		commitsToDisplay[0] = "";
+		
+		for (int i = 0; i < commit.size(); i++) {
+			String message = commit.get(i).getCommitMessage();
+			String time = convertLongToDate(commit.get(i).getCommitTime());
+			
+			String msgToDisplay = message + " - " + time;
+			toDisplay[i+1] = msgToDisplay;
+			commitsToDisplay[i+1] = msgToDisplay;
+			//System.out.println(toDisplay[i]);
+			System.out.println(commitsToDisplay[i]);
+		}
+		
+		if (gitCommitList != null) {
+			//System.out.println("gitCommitList is not null");
+			gitCommitList.removeAll();
+		}
+		
+		gitCommitList.setModel(new DefaultComboBoxModel<Object>(commitsToDisplay));
+		
+//		for (String msg: commitsToDisplay) {
+//			gitCommitList.addItem(msg);
+//		}
+		
+		//gitCommitList = new JComboBox<Object>(commitsToDisplay);
+		
 	}
 	
 	/**
