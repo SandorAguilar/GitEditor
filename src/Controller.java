@@ -14,9 +14,6 @@ import java.text.Format;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Timer;
-import java.util.TimerTask;
-
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
@@ -31,6 +28,12 @@ import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+/**
+ * This class controls what's displayed on the screen
+ * and handle the action events for each available input.
+ * @author sandor
+ *
+ */
 public class Controller {
 
 	private File workingFile;
@@ -74,6 +77,10 @@ public class Controller {
 	private JComboBox gitCommitList;
 
 
+	/**
+	 * Starts the application.
+	 * @param args
+	 */
 	public static void main(String[] args) {
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
@@ -86,6 +93,10 @@ public class Controller {
 		}); 
 	}
 
+	/**
+	 * Initializes the code and creates the necessary 
+	 * folder if its not already there.
+	 */
 	public void init() {
 		//view = new View();    
 		homeDir = System.getProperty("user.home");
@@ -96,6 +107,9 @@ public class Controller {
         }
 	}
 
+	/**
+	 * Displays the gui with given parameters. 
+	 */
 	public void display() {
 		layOutComponents();
 		attachListenersToComponents();
@@ -106,6 +120,10 @@ public class Controller {
 		frame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 	}
 
+	/**
+	 * Details all components and how they are attached
+	 * to the JFrame.
+	 */
 	private void layOutComponents() {
 
 		frame = new JFrame("GitEditor");
@@ -315,7 +333,8 @@ public class Controller {
 	}
 
 	/**
-	 * 
+	 * Updates the array of items that's used to populate the
+	 * drop down on which previous commit to return.
 	 * @param commit
 	 * @param time
 	 */
@@ -366,23 +385,6 @@ public class Controller {
 			e.printStackTrace();
 		}             
 	}
-
-	/**
-	 * 
-	 * @return - if the current file has been saved already.
-	 */
-	public boolean isFileAlreadySaved() {
-		return fileAlreadySaved;
-	}
-
-	/**
-	 * 
-	 * @param fileAlreadySaved - setting if the file has already
-	 * been saved. 
-	 */
-	public void setFileAlreadySaved(boolean fileAlreadySaved) {
-		this.fileAlreadySaved = fileAlreadySaved;
-	}
 	
 	/**
 	 * Converts a time in long to a readable string format.
@@ -395,5 +397,22 @@ public class Controller {
 	    //Format format = new SimpleDateFormat("yyyy MM dd HH:mm:ss");
 		//System.out.println(format.format(date));
 	    return format.format(date);
+	}
+	
+	/**
+	 * Getter method for private variable.
+	 * @return - if the current file has been saved already.
+	 */
+	public boolean isFileAlreadySaved() {
+		return fileAlreadySaved;
+	}
+
+	/**
+	 * Setter method for private variable. 
+	 * @param fileAlreadySaved - setting if the file has already
+	 * been saved. 
+	 */
+	public void setFileAlreadySaved(boolean fileAlreadySaved) {
+		this.fileAlreadySaved = fileAlreadySaved;
 	}
 }
