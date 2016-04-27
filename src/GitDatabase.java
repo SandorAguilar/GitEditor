@@ -137,7 +137,7 @@ public class GitDatabase {
 		
 		String fileStoredName = System.currentTimeMillis() + "";
 
-		String newFileStoredPath = gitDatabasePath + fileStoredName;
+		String newFileStoredPath = gitDatabasePath + "/" + fileStoredName;
 		File newFile = new File (newFileStoredPath);
 		FileNode newFileNode = new FileNode (newFile);
 		
@@ -146,7 +146,7 @@ public class GitDatabase {
 		
 		currentNode.addChildren(newFileNode);
 		
-		newFileNode = currentNode;
+		currentNode = newFileNode;
 		currentTree.setCurrentNode(currentNode);
 		
 		try {
@@ -195,7 +195,11 @@ public class GitDatabase {
 		addTreeToQueue (pq, currentTree.getHeadNode());
 		
 		ArrayList<Commit> result = new ArrayList<Commit> ();
-		result.add(pq.poll());
+		 
+		while (!pq.isEmpty() && result.size() < 10) {
+			result.add(pq.poll());
+		}
+		
 		return result;
 		
 	}
@@ -204,10 +208,13 @@ public class GitDatabase {
 	 * This method is used to open the retrieved version of files.
 	 * @param fileName
 	 */
-	public String openRetrievedVersion (String fileName) {
+	public String openRetrievedVersion (String fileName, String previousFileContent) {
+		save (previousFileContent, "Saved before open a retrieved version.");
 		File retrievedFile = new File (gitDatabasePath + "/" + fileName);
 		FileNode retrievedNode = currentTree.findNode(retrievedFile.getPath());
 		currentNode = retrievedNode;
+		currentTree.setCurrentNode(currentNode);
+		
 		return getFileContent (retrievedFile);
 		
 	}
@@ -217,6 +224,7 @@ public class GitDatabase {
 			return;
 		}
 		
+//		System.out.println(node.getFile().getName());
 		Commit commit = new Commit (Long.parseLong(node.getFile().getName()), node.getCommitMessage());
 		pq.add(commit);
 		
@@ -321,7 +329,7 @@ public class GitDatabase {
 			BufferedReader br1 = new BufferedReader (fileReader);
 			
 			String line = null;
-			while ((line = br1.readLine()) != null) {
+			while ((line = br1.readLine()) != null && line.length() > 0) {
 				String [] lineInfo = line.split(";");
 				File file = new File (lineInfo[0]);
 //				FileNode fileNode = new FileNode (file);
@@ -364,7 +372,7 @@ public class GitDatabase {
 		for (MyFileTree mft: fileTreeData) {
 			try {
 				
-				FileWriter fileWriter = new FileWriter (gitDatabasePath + "/" + mft.getFileName(), true);
+				FileWriter fileWriter = new FileWriter (gitDatabasePath + "/" + mft.getFileName(), false);
 				BufferedWriter bw = new BufferedWriter (fileWriter);
 //				bw.write(mft.getFileName() + "\n");
 				writeNodeToTheFile (bw, mft.getHeadNode());
@@ -396,7 +404,7 @@ public class GitDatabase {
 			}
 			
 			if (writeString.endsWith(",")) {
-				writeString.substring(0, writeString.length() - 1);
+				writeString = writeString.substring(0, writeString.length() - 1);
 			}
 		}
 		
@@ -414,6 +422,7 @@ public class GitDatabase {
 			writeString += "F";
 		}
 		
+		writeString += "\n";
 		bw.write(writeString);
 		
 		if (node.getChildren() != null) {
