@@ -3,15 +3,19 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Timer;
-import java.util.TimerTask;
-
+import java.text.Format;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -21,13 +25,16 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.WindowConstants;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+/**
+ * This class controls what's displayed on the screen
+ * and handle the action events for each available input.
+ * @author sandor
+ *
+ */
 public class Controller {
-
-	private View view;
-	private Timer timer;
-	private TimerTask task;
 
 	private File workingFile;
 	private File gitFile;
@@ -36,6 +43,8 @@ public class Controller {
 	private JPanel menuPanel;
 	private JPanel statPanel;
 	private JPanel spellCheckPanel;
+	private JPanel spellCheckButtonPanel;
+	private JPanel retrievePanel;
 
 	private JButton openButton;
 	private JButton saveButton;
@@ -44,12 +53,11 @@ public class Controller {
 	private JButton updateButton;     
 
 	private JFileChooser fileChooser;
-
-	private JLabel wordCountLabel;
-	private JLabel totalCommitsLabel;
-
-	private JLabel wordCountResultLabel;
-	private JLabel totalCommitResultLabel;
+	
+	private JLabel blank1;
+	private JLabel blank2;
+	
+	private JLabel retrieveLabel;
 
 	private JTextPane mainTextPane;
 	private JTextPane spellCheckPane;
@@ -64,8 +72,15 @@ public class Controller {
 	private String homeDir;
 	private String gitPath;
 	private String gitFileString;
+	private String[] toDisplay;
+	
+	private JComboBox gitCommitList;
 
 
+	/**
+	 * Starts the application.
+	 * @param args
+	 */
 	public static void main(String[] args) {
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
@@ -78,22 +93,23 @@ public class Controller {
 		}); 
 	}
 
+	/**
+	 * Initializes the code and creates the necessary 
+	 * folder if its not already there.
+	 */
 	public void init() {
-		view = new View();    
+		//view = new View();    
 		homeDir = System.getProperty("user.home");
 		File file = new File(homeDir + "//.gitEditor");
-		//System.out.println(homeDir);
 		gitPath = file.getAbsolutePath();
-		//System.out.println(gitPath);
 		if (!file.exists()) {
-            if (file.mkdir()) {
-                //System.out.println("Directory is created!");
-            } else {
-                //System.out.println("Failed to create directory!");
-            }
+			file.mkdir();     
         }
 	}
 
+	/**
+	 * Displays the gui with given parameters. 
+	 */
 	public void display() {
 		layOutComponents();
 		attachListenersToComponents();
@@ -101,94 +117,114 @@ public class Controller {
 		frame.setVisible(true);
 		frame.setResizable(false);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		//timer = new Timer();
-		// timer.schedule(new Task(), 0, 5000);
+		frame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 	}
 
+	/**
+	 * Details all components and how they are attached
+	 * to the JFrame.
+	 */
 	private void layOutComponents() {
 
 		frame = new JFrame("GitEditor");
 		menuPanel = new JPanel();
 		statPanel = new JPanel();
 		spellCheckPanel = new JPanel();
+		spellCheckButtonPanel = new JPanel();
+		retrievePanel = new JPanel();
 		menuPanel.setLayout(new GridLayout(1,7));
 		statPanel.setLayout(new GridLayout(1,5));
-		//spellCheckPanel.setLayout(new GridLayout(2,1));
+		spellCheckButtonPanel.setLayout(new GridLayout(1,3));
 		spellCheckPanel.setLayout(new BorderLayout());
+		retrievePanel.setLayout(new BorderLayout());
+		
 
 		fileChooser = new JFileChooser();
 		FileNameExtensionFilter filter = new FileNameExtensionFilter("TEXT FILES", "txt", "text");
 		fileChooser.setFileFilter(filter);
-
+		
+		blank1 = new JLabel("");
+		blank2 = new JLabel("");
+		
+		retrieveLabel = new JLabel("pick previous commit", SwingConstants.CENTER);
 
 		openButton = new JButton("open");
 		saveButton = new JButton("save");
 		retrieveButton = new JButton("retrieve");
 		updateButton = new JButton("update");
 		spellCheckButton = new JButton("spell check");
+		
+		spellCheckButtonPanel.add(blank1);
+		spellCheckButtonPanel.add(spellCheckButton);
+		spellCheckButtonPanel.add(blank2);
+		
+		ArrayList<String> commentList = new ArrayList<>();
+		ArrayList<Long> timeList = new ArrayList<>();
+		
+		commentList.add("initial commit");
+		commentList.add("implemented gui");
+		commentList.add("refactored the main class");
+		
+		timeList.add(System.currentTimeMillis());
+		timeList.add(System.currentTimeMillis());
+		timeList.add(System.currentTimeMillis());
+		
+		updateGitList(commentList, timeList);
 
 		spellCheckButton.setPreferredSize(new Dimension(10,30));
 
 
 		menuPanel.add(openButton);
 		menuPanel.add(saveButton);
-
-		menuPanel.add(retrieveButton);
-
+		menuPanel.add(retrievePanel);
+		
 		mainTextPane = new JTextPane();
 		spellCheckPane = new JTextPane();
 
-		//spellCheckPane.setSize(new Dimension(700,300));
 		spellCheckPane.setPreferredSize(new Dimension(100,100));
 
-
 		mainTextPane.setEditable(true);
-
 
 		mainTextPaneScroll = new JScrollPane(mainTextPane);
 		spellCheckPaneScroll = new JScrollPane(spellCheckPane);
 		spellCheckPaneScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 		mainTextPaneScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 
-		wordCountLabel = new JLabel("  Word Count:  ", SwingConstants.RIGHT);
-		totalCommitsLabel = new JLabel("  Total Commits:  ", SwingConstants.RIGHT);
+		
+		retrievePanel.add(BorderLayout.NORTH, retrieveLabel);
+		retrievePanel.add(BorderLayout.CENTER, gitCommitList);
 
-
-		wordCountResultLabel = new JLabel("", SwingConstants.LEFT);
-		totalCommitResultLabel = new JLabel("", SwingConstants.LEFT);
-
-		statPanel.add(wordCountLabel);
-		statPanel.add(wordCountResultLabel);
-		statPanel.add(totalCommitsLabel);
-		statPanel.add(totalCommitResultLabel);
-		statPanel.add(updateButton);
-
-		//spellCheckPanel.add(spellCheckButton);
-		//spellCheckPanel.add(spellCheckPane);
-
-		spellCheckPanel.add(BorderLayout.NORTH, spellCheckButton);
-		//spellCheckPanel.add(BorderLayout.CENTER, spellCheckPane);
-		//spellCheckPanel.add(BorderLayout.EAST, spellCheckPaneScroll);
+		spellCheckPanel.add(BorderLayout.NORTH, spellCheckButtonPanel);
 		spellCheckPanel.add(BorderLayout.CENTER, spellCheckPaneScroll);
 
-		//frame.add(BorderLayout.EAST, mainTextPaneScroll);
 		frame.add(BorderLayout.NORTH, menuPanel);
-		//frame.add(BorderLayout.SOUTH, statPanel);
-		//frame.add(BorderLayout.WEST, spellCheckPanel);
 		frame.add(BorderLayout.SOUTH, spellCheckPanel);
 		frame.add(BorderLayout.CENTER, mainTextPaneScroll);
 	}
 
 	/**
-	 * Attaches the listeners.
+	 * Attaches the action listeners.
 	 */
 	private void attachListenersToComponents() {
-		updateButton.addActionListener(new ActionListener() {
+		
+		frame.addWindowListener(new WindowAdapter() {
 			@Override
-			public void actionPerformed(ActionEvent event) {
-				String wordCount = Integer.toString(getWordCount());
-				wordCountResultLabel.setText(wordCount); 
-			}
+            public void windowClosing(WindowEvent e)
+            {
+				if ((isFileAlreadySaved() && !mainTextPane.getText().equals(previousSave))
+						|| (!isFileAlreadySaved() && mainTextPane.getText().length() > 0)) {
+					int returnVal = JOptionPane.showConfirmDialog(frame, "save message before closing?");
+					if (returnVal == 0) {
+						saveButton.doClick();
+						e.getWindow().dispose();
+					}
+					else if (returnVal == 1) {
+						e.getWindow().dispose();
+					} 
+				} else {
+					e.getWindow().dispose();
+				}
+            }
 		});
 
 		openButton.addActionListener(new ActionListener() {
@@ -201,7 +237,6 @@ public class Controller {
 					if (returnVal == 0) {
 						if (returnVal == JFileChooser.APPROVE_OPTION) {
 							file = fileChooser.getSelectedFile();
-							//System.out.println(file.getName());
 							frame.setTitle("GitEditor - " + file.getName());
 						}
 						readFile(file);
@@ -211,10 +246,8 @@ public class Controller {
 						previousSave = mainTextPane.getText();
 					}
 				} catch (Exception e) {
-					//System.out.println("doh");
+					
 				}
-				//System.out.println("returnVal: " + returnVal);
-
 			}
 		});
 
@@ -223,20 +256,14 @@ public class Controller {
 			public void actionPerformed(ActionEvent event) {
 				if (!isFileAlreadySaved()) {
 					if (fileChooser.showSaveDialog(frame) == JFileChooser.APPROVE_OPTION) {
-						//File file = fileChooser.getSelectedFile();
+						
 						String filePath = fileChooser.getSelectedFile().getAbsolutePath();
-						//System.out.println(file.getName());
+						
 						File savedFile = new File(filePath + ".txt");
 						File gitSavedFile = new File(gitPath + "//" + fileChooser.getSelectedFile().getName() + ".txt");
 
-						//System.out.println(savedFile.getName());
-
 						try {
-							if (savedFile.createNewFile()){
-								//System.out.println("File is created!");
-							}else{
-								//System.out.println("File already exists.");
-							}
+							savedFile.createNewFile();							
 						} catch (IOException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
@@ -261,6 +288,7 @@ public class Controller {
 						workingFile = savedFile;
 						gitFile = gitSavedFile;
 						previousSave = mainTextPane.getText();
+						frame.setTitle("GitEditor - " + workingFile.getName());
 					}
 				} else {
 					if (!previousSave.equals(mainTextPane.getText())) {
@@ -280,17 +308,19 @@ public class Controller {
 						}
 
 						commitMessage = JOptionPane.showInputDialog(frame, "commit message:", null);
-						System.out.print("commitMessage: " + commitMessage);
+						//System.out.print("commitMessage: " + commitMessage);
 						previousSave = mainTextPane.getText();
 					}
 				}
 			}
 		});
 
-		retrieveButton.addActionListener(new ActionListener() {
+		//retrieveButton.addActionListener(new ActionListener() {
+		gitCommitList.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent event) {
-				// TODO
+				String commit = (String)gitCommitList.getSelectedItem();
+				System.out.println(commit);
 			}
 		});
 
@@ -303,45 +333,30 @@ public class Controller {
 	}
 
 	/**
-	 * Counts the number of words that are currently in the main text area.
-	 * @return - the number of words.
+	 * Updates the array of items that's used to populate the
+	 * drop down on which previous commit to return.
+	 * @param commit
+	 * @param time
 	 */
-	public int getWordCount() {
-		int count = 0;
-
-		String text = mainTextPane.getText();
-
-		//System.out.println("textLength: " + text.length());
-
-		if (text.length() == 0 || text == null) {
-			return 0;
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public void updateGitList(ArrayList<String> commit, ArrayList<Long> time) {
+		if (gitCommitList != null) {
+			gitCommitList = null;
 		}
-
-		for (int i = 0; i < text.length() - 1; i++) {
-
-			char s1 = text.charAt(i);
-			char s2 = text.charAt(i+1);
-
-			//System.out.println(i + " -> 1." +  Character.toString(s1) + ":" + (int)s1 +
-			//               " 2." +  Character.toString(s2) + ":" + (int)s2);
-
-			if (((int)s1 != 13 || s1 != ' ') && (s2 == ' ' || i+2 == text.length() || (int)s2 == 13)) {
-				count++;
-			}
-
-			if ((int)s2 == 13 && s1 != ' ') {
-				count++;
-			}
-
-			else  if (s1 == 13 && s2 == 10) {
-				count--;
-			}
+			
+		toDisplay = new String[commit.size() + 1];
+		
+		toDisplay[0] = "";
+		
+		for (int i = 0; i < commit.size(); i++) {
+			String message = commit.get(i) + " - " + convertLongToDate(time.get(i));
+			toDisplay[i+1] = message;
+			//System.out.println(toDisplay[i]);
 		}
-		//System.out.println("count: " + count);
-		//System.out.println("----------------------");
-		String wordCount = Integer.toString(count);
-		wordCountResultLabel.setText(wordCount);
-		return count;
+		
+		gitCommitList = new JComboBox(toDisplay);
+		
+		//JComboBox list = new JComboBox(toDisplay);	
 	}
 
 	/**
@@ -370,9 +385,22 @@ public class Controller {
 			e.printStackTrace();
 		}             
 	}
-
+	
 	/**
-	 * 
+	 * Converts a time in long to a readable string format.
+	 * @param time - the long we want to convert.
+	 * @return - the time as a string so its in a readable format.
+	 */
+	public String convertLongToDate(Long time) {
+		Date date = new Date(time);
+		Format format = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+	    //Format format = new SimpleDateFormat("yyyy MM dd HH:mm:ss");
+		//System.out.println(format.format(date));
+	    return format.format(date);
+	}
+	
+	/**
+	 * Getter method for private variable.
 	 * @return - if the current file has been saved already.
 	 */
 	public boolean isFileAlreadySaved() {
@@ -380,21 +408,11 @@ public class Controller {
 	}
 
 	/**
-	 * 
+	 * Setter method for private variable. 
 	 * @param fileAlreadySaved - setting if the file has already
 	 * been saved. 
 	 */
 	public void setFileAlreadySaved(boolean fileAlreadySaved) {
 		this.fileAlreadySaved = fileAlreadySaved;
-	}
-
-	class Task extends TimerTask {
-		@Override
-		public void run() {
-			// TODO Auto-generated method stub
-			if (mainTextPane.getText().length() > 0) {
-				getWordCount();
-			}
-		}             
 	}
 }
