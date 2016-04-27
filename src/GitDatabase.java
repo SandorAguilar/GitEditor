@@ -143,6 +143,7 @@ public class GitDatabase {
 		
 		newFileNode.setParent(currentNode);
 		newFileNode.setCommitMessage(commitMessage);
+		System.out.println("Set commit message:" + commitMessage);
 		
 		currentNode.addChildren(newFileNode);
 		
@@ -168,6 +169,7 @@ public class GitDatabase {
 	 * @return a boolean variable indicating whether there are file records or not. 
 	 */
 	public boolean retrieveFileRecordsFromDatabase (String fileName, String content) {
+		closeDatabase();
 		for (MyFileTree mft: fileTreeData) {
 			if (mft.getFileName().equals(fileName)) {
 				currentTree = mft;
@@ -209,10 +211,12 @@ public class GitDatabase {
 	 * @param fileName
 	 */
 	public String openRetrievedVersion (String fileName, String previousFileContent) {
-		save (previousFileContent, "Saved before open a retrieved version.");
+		save (previousFileContent, "Saved before opening a retrieved version.");
 		File retrievedFile = new File (gitDatabasePath + "/" + fileName);
+		System.out.println("The retrieved file path is:" + retrievedFile.getPath());
 		FileNode retrievedNode = currentTree.findNode(retrievedFile.getPath());
 		currentNode = retrievedNode;
+		System.out.println("The current Node is:" + currentNode);
 		currentTree.setCurrentNode(currentNode);
 		
 		return getFileContent (retrievedFile);
@@ -329,6 +333,7 @@ public class GitDatabase {
 			BufferedReader br1 = new BufferedReader (fileReader);
 			
 			String line = null;
+			boolean headNodeSet = false;
 			while ((line = br1.readLine()) != null && line.length() > 0) {
 				String [] lineInfo = line.split(";");
 				File file = new File (lineInfo[0]);
@@ -355,10 +360,16 @@ public class GitDatabase {
 				
 				if (lineInfo[3].length() > 0) {
 					fileNode.setCommitMessage(lineInfo[3]);
+					System.out.println("SetCommitMessage:" + lineInfo[3]);
 				}
 				if (lineInfo[4].equals("T")) {
 					mft.setCurrentNode(fileNode);
 				}
+				
+				if (headNodeSet == false) {
+					mft.setHeadNode(fileNode);
+					headNodeSet = true;
+				} 
  			}
 			
 			br1.close();
@@ -369,19 +380,17 @@ public class GitDatabase {
 	}
 	
 	public void closeDatabase() {
-		for (MyFileTree mft: fileTreeData) {
-			try {
-				
-				FileWriter fileWriter = new FileWriter (gitDatabasePath + "/" + mft.getFileName(), false);
-				BufferedWriter bw = new BufferedWriter (fileWriter);
+		try {
+			
+			FileWriter fileWriter = new FileWriter (gitDatabasePath + "/" + currentTree.getFileName(), false);
+			BufferedWriter bw = new BufferedWriter (fileWriter);
 //				bw.write(mft.getFileName() + "\n");
-				writeNodeToTheFile (bw, mft.getHeadNode());
-				bw.flush();
-				bw.close();
-				
-			} catch (Exception e){
-				e.printStackTrace();
-			}
+			writeNodeToTheFile (bw, currentTree.getHeadNode());
+			bw.flush();
+			bw.close();
+			
+		} catch (Exception e){
+			e.printStackTrace();
 		}
 	}
 	
