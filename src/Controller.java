@@ -14,6 +14,7 @@ import java.text.Format;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
@@ -75,6 +76,8 @@ public class Controller {
 	private String[] toDisplay;
 	
 	private JComboBox gitCommitList;
+	
+	GitDatabase database;
 
 
 	/**
@@ -101,6 +104,7 @@ public class Controller {
 		//view = new View();    
 		homeDir = System.getProperty("user.home");
 		File file = new File(homeDir + "//.gitEditor");
+		database = GitDatabase.getInstance();
 		gitPath = file.getAbsolutePath();
 		if (!file.exists()) {
 			file.mkdir();     
@@ -214,11 +218,14 @@ public class Controller {
 				if ((isFileAlreadySaved() && !mainTextPane.getText().equals(previousSave))
 						|| (!isFileAlreadySaved() && mainTextPane.getText().length() > 0)) {
 					int returnVal = JOptionPane.showConfirmDialog(frame, "save message before closing?");
+					//System.out.println("returnVal: " + returnVal);
 					if (returnVal == 0) {
 						saveButton.doClick();
+						database.closeDatabase(); // closing the database
 						e.getWindow().dispose();
 					}
 					else if (returnVal == 1) {
+						database.closeDatabase(); // closing the database
 						e.getWindow().dispose();
 					} 
 				} else {
@@ -262,6 +269,10 @@ public class Controller {
 						File savedFile = new File(filePath + ".txt");
 						File gitSavedFile = new File(gitPath + "//" + fileChooser.getSelectedFile().getName() + ".txt");
 
+						if (!database.createNewFile(fileChooser.getSelectedFile().getName(), mainTextPane.getText())) {
+							System.out.println("file already in db");
+						}
+						
 						try {
 							savedFile.createNewFile();							
 						} catch (IOException e) {
