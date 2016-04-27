@@ -8,7 +8,7 @@ public class GitTester {
 		
 		database.createNewFile("file1", "This is the eighth file for testing.");
 		
-		database.save ("This is the eighth file for testing. Added new line", "Add a new line");
+		database.save ("This is the first file for testing. Added new line", "Add a new line");
 //		
 //		database.save ("This is the Second file for testing. Added another new line", "Add another new line");
 //		
