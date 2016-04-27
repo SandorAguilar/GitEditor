@@ -35,8 +35,12 @@ public class MyFileTree {
 			return null;
 		}
 		
+		if (startNode.getFile().getPath().equals(filePath)) {
+			return startNode;
+		}
 		for (FileNode fileNode: startNode.getChildren()) {
 			if (fileNode.getFile().getPath().equals(filePath)) {
+//				System.out.println("children's path:" + fileNode.getFile().getPath());
 				return fileNode;
 			}
 		}
