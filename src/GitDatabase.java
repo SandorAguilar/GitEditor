@@ -9,9 +9,9 @@ import java.util.PriorityQueue;
 
 public class GitDatabase {
 	
-	private GitDatabase database = null;
-	private ArrayList<MyFileTree> fileTreeData;
-	private String gitDatabasePath = ".gitDatabase";
+	private static GitDatabase database = null;
+	private static ArrayList<MyFileTree> fileTreeData;
+	private static String gitDatabasePath = ".gitDatabase";
 	private FileNode currentNode;
 	private MyFileTree currentTree;
 	
@@ -37,15 +37,20 @@ public class GitDatabase {
 		
 	}
 	
-	public GitDatabase getInstance () {
+	public static GitDatabase getInstance () {
 		if (database == null) {
-			database.init(".gitDatabase");
+			database = new GitDatabase();
+			init(gitDatabasePath);
 		} 
 		
 		return database;
 	}
 	
-	public void createNewFile (String fileName, String content) {
+	public boolean createNewFile (String fileName, String content) {
+		
+		if (!checkFileName(fileName)) {
+			return false;
+		}
 		
 		MyFileTree newFileTree = new MyFileTree (fileName);
 		String fileStoredName = System.currentTimeMillis() + "";
@@ -71,10 +76,60 @@ public class GitDatabase {
 		}
 		
 		fileTreeData.add(newFileTree);
-		writeFileNameToDirectory (fileName, fileStoredName);
+		writeFileNameToDirectory (fileName);
+
 		
 		currentNode = newFileHeadNode;
 		currentTree = newFileTree;
+		
+		updateTreeRecords (fileName);
+		
+		return true;
+		
+	}
+	
+	private boolean checkFileName (String fileName) {
+		for (MyFileTree mft: fileTreeData) {
+			if (mft.getFileName().equals(fileName)) {
+				return false;
+			}
+		}
+		
+		return true;
+	}
+	
+	private void updateTreeRecords (String fileName) {
+		String fileStoredPath = gitDatabasePath + "/" + fileName;
+		try {
+			
+			FileWriter fileWriter = new FileWriter (fileStoredPath);
+			BufferedWriter bw = new BufferedWriter (fileWriter);
+			writeNodeRecords (bw, currentTree.getCurrentNode());
+			bw.flush();
+			bw.close();
+			
+			
+		} catch (Exception e){
+			e.printStackTrace();
+		}
+		
+		
+	}
+	
+	private void writeNodeRecords (BufferedWriter bw, FileNode fileNode) throws Exception{
+		
+		bw.write(fileNode.getFile().getPath() + ";");
+		if (fileNode.getParent() != null) {
+			bw.write(fileNode.getParent().getFile().getPath());
+		} else {
+			bw.write(";");
+		}
+		
+		if (fileNode.getChildren() != null) {
+			for (FileNode child: fileNode.getChildren()) {
+				
+			}
+		}
 		
 	}
 	
@@ -191,12 +246,12 @@ public class GitDatabase {
 		return content;
 	}
 	
-	private void writeFileNameToDirectory (String fileName, String fileStoredName) {
+	private void writeFileNameToDirectory (String fileName) {
 		try {
 			
 			FileWriter fileWriter = new FileWriter (gitDatabasePath + "/fileDirectory.txt", true);
 			BufferedWriter bw = new BufferedWriter (fileWriter);
-			bw.write(fileName + ":" + fileStoredName);
+			bw.write(fileName + "\n");
 			bw.flush();
 			bw.close();
 			
@@ -206,7 +261,7 @@ public class GitDatabase {
 		
 	}
 	
-	private void init (String gitDatabasePath) {
+	private static void init (String gitDatabasePath) {
 		
 		File homeDirectory = new File (gitDatabasePath);
 		fileTreeData = new ArrayList<MyFileTree> ();
@@ -228,7 +283,7 @@ public class GitDatabase {
 		}
 	}
 	
-	private void populateFiles (String directoryPath) {
+	private static void populateFiles (String directoryPath) {
 		
 		ArrayList<String> storedFiles = new ArrayList<String> ();
 		try {
@@ -237,6 +292,7 @@ public class GitDatabase {
 			
 			String line = null;
 			while ((line = br1.readLine()) != null) {
+				if (line.length () > 0)
 				storedFiles.add(line);
 			}
 			
@@ -247,16 +303,19 @@ public class GitDatabase {
 		}
 		
 		for (String storedFile: storedFiles) {
-			String[] storedFileInfo = storedFile.split(":");
-			String path = ".gitDatabase/" + storedFileInfo[1];
-			MyFileTree mft = new MyFileTree(storedFileInfo[0]);
+//			String[] storedFileInfo = storedFile.split(":");
+//			String path = ".gitDatabase/" + storedFileInfo[1];
+//			MyFileTree mft = new MyFileTree(storedFileInfo[0]);
+			
+			String path = gitDatabasePath + "/" + storedFile;
+			MyFileTree mft = new MyFileTree(storedFile);
 			populateData (path, mft);
 			fileTreeData.add(mft);
 		}	
 		
 	}
 	
-	private void populateData (String filePath, MyFileTree mft) {
+	private static void populateData (String filePath, MyFileTree mft) {
 		try {
 			FileReader fileReader = new FileReader (filePath);
 			BufferedReader br1 = new BufferedReader (fileReader);
@@ -298,6 +357,69 @@ public class GitDatabase {
 
 		} catch (Exception e) {
 			e.printStackTrace();
+		}
+	}
+	
+	public void closeDatabase() {
+		for (MyFileTree mft: fileTreeData) {
+			try {
+				
+				FileWriter fileWriter = new FileWriter (gitDatabasePath + "/" + mft.getFileName(), true);
+				BufferedWriter bw = new BufferedWriter (fileWriter);
+//				bw.write(mft.getFileName() + "\n");
+				writeNodeToTheFile (bw, mft.getHeadNode());
+				bw.flush();
+				bw.close();
+				
+			} catch (Exception e){
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	private void writeNodeToTheFile (BufferedWriter bw, FileNode node) throws Exception{
+		if (node == null) {
+			return;
+		}
+		
+		String writeString = node.getFile().getPath() + ";";
+		
+		if (node.getParent() != null) {
+			writeString += node.getParent().getFile().getPath();
+		}
+		
+		writeString += ";";
+		
+		if (node.getChildren() != null) {
+			for (FileNode child: node.getChildren()) {
+				writeString += child.getFile().getPath() + ",";
+			}
+			
+			if (writeString.endsWith(",")) {
+				writeString.substring(0, writeString.length() - 1);
+			}
+		}
+		
+		writeString += ";";
+		
+		if (node.getCommitMessage()!= null) {
+			writeString += node.getCommitMessage();
+		}
+		
+		writeString += ";";
+		
+		if (node == currentNode) {
+			writeString += "T";
+		} else {
+			writeString += "F";
+		}
+		
+		bw.write(writeString);
+		
+		if (node.getChildren() != null) {
+			for (FileNode child: node.getChildren()) {
+				writeNodeToTheFile (bw, child);
+			}
 		}
 	}
 }
