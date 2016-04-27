@@ -380,6 +380,7 @@ public class GitDatabase {
 	}
 	
 	public void closeDatabase() {
+		System.out.println("--- closing database ---");
 		try {
 			
 			FileWriter fileWriter = new FileWriter (gitDatabasePath + "/" + currentTree.getFileName(), false);
