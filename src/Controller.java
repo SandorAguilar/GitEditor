@@ -336,8 +336,14 @@ public class Controller {
 		gitCommitList.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent event) {
-				String commit = (String)gitCommitList.getSelectedItem();
-				System.out.println(commit);
+				//String commit = (String)gitCommitList.getSelectedItem();
+				//System.out.println(commit);
+				previousSave = mainTextPane.getText();
+				System.out.println(gitFile.getName());
+				String fileName = gitFile.getName();
+				fileName = fileName.substring(0, fileName.lastIndexOf('.'));
+				System.out.println(fileName);
+				mainTextPane.setText(database.openRetrievedVersion(fileName, previousSave));
 			}
 		});
 
@@ -439,7 +445,7 @@ public class Controller {
 			toDisplay[i+1] = msgToDisplay;
 			commitsToDisplay[i+1] = msgToDisplay;
 			//System.out.println(toDisplay[i]);
-			System.out.println(commitsToDisplay[i]);
+			//System.out.println(commitsToDisplay[i]);
 		}
 		
 		if (gitCommitList != null) {
