@@ -478,7 +478,7 @@ public class Controller {
 		
 		if (gitCommitList != null) {
 			//System.out.println("gitCommitList is not null");
-			gitCommitList.removeAll();
+			//gitCommitList.removeAll();
 		}
 		
 		gitCommitList.setModel(new DefaultComboBoxModel<Object>(commitsToDisplay));
