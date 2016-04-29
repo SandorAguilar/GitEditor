@@ -169,7 +169,9 @@ public class GitDatabase {
 	 * @return a boolean variable indicating whether there are file records or not. 
 	 */
 	public boolean retrieveFileRecordsFromDatabase (String fileName, String content) {
-		closeDatabase();
+		if (currentTree != null) {
+			closeDatabase();
+		} 
 		for (MyFileTree mft: fileTreeData) {
 			if (mft.getFileName().equals(fileName)) {
 				currentTree = mft;
@@ -210,9 +212,9 @@ public class GitDatabase {
 	 * This method is used to open the retrieved version of files.
 	 * @param fileName
 	 */
-	public String openRetrievedVersion (String fileName, String previousFileContent) {
+	public String openRetrievedVersion (String storedFileTime, String previousFileContent) {
 		save (previousFileContent, "Saved before opening a retrieved version.");
-		File retrievedFile = new File (gitDatabasePath + "/" + fileName);
+		File retrievedFile = new File (gitDatabasePath + "/" + storedFileTime);
 		System.out.println("The retrieved file path is:" + retrievedFile.getPath());
 		FileNode retrievedNode = currentTree.findNode(retrievedFile.getPath());
 		currentNode = retrievedNode;
@@ -380,6 +382,10 @@ public class GitDatabase {
 	}
 	
 	public void closeDatabase() {
+		if (currentTree == null) {
+			return;
+		}
+		
 		try {
 			
 			FileWriter fileWriter = new FileWriter (gitDatabasePath + "/" + currentTree.getFileName(), false);
