@@ -15,6 +15,7 @@ import java.text.Format;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
@@ -107,6 +108,7 @@ public class Controller {
 		homeDir = System.getProperty("user.home");
 		File file = new File(homeDir + "//.gitEditor");
 		database = GitDatabase.getInstance();
+		//database.closeDatabase();
 		gitPath = file.getAbsolutePath();
 		if (!file.exists()) {
 			file.mkdir();     
@@ -122,7 +124,7 @@ public class Controller {
 		frame.setSize(900, 700);
 		frame.setVisible(true);
 		frame.setResizable(false);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		//frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 	}
 
@@ -175,7 +177,9 @@ public class Controller {
 		//timeList.add(System.currentTimeMillis());
 		//timeList.add(System.currentTimeMillis());
 		
-		updateGitList(commentList, timeList);
+		//updateGitList(commentList, timeList);
+		
+		gitCommitList = new JComboBox<Object>();
 
 		spellCheckButton.setPreferredSize(new Dimension(10,30));
 
@@ -220,17 +224,36 @@ public class Controller {
 				if ((isFileAlreadySaved() && !mainTextPane.getText().equals(previousSave))
 						|| (!isFileAlreadySaved() && mainTextPane.getText().length() > 0)) {
 					int returnVal = JOptionPane.showConfirmDialog(frame, "save message before closing?");
-					//System.out.println("returnVal: " + returnVal);
+					System.out.println("returnVal: " + returnVal);
 					if (returnVal == 0) {
 						saveButton.doClick();
+						try {
+							Thread.sleep(500);
+						} catch (InterruptedException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
 						database.closeDatabase(); // closing the database
 						e.getWindow().dispose();
 					}
 					else if (returnVal == 1) {
+						try {
+							Thread.sleep(500);
+						} catch (InterruptedException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
 						database.closeDatabase(); // closing the database
 						e.getWindow().dispose();
 					} 
 				} else {
+					try {
+						Thread.sleep(500);
+					} catch (InterruptedException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					database.closeDatabase();
 					e.getWindow().dispose();
 				}
             }
@@ -302,6 +325,11 @@ public class Controller {
 						gitFile = gitSavedFile;
 						previousSave = mainTextPane.getText();
 						frame.setTitle("GitEditor - " + workingFile.getName());
+						updateArrayListToArray(database.retrieve());
+						String fileName = gitFile.getName();
+						fileName = fileName.substring(0, fileName.lastIndexOf('.'));
+						System.out.println("fileName when creating: " + fileName);
+						database.createNewFile(fileName, mainTextPane.getText());
 					}
 				} else {
 					if (!previousSave.equals(mainTextPane.getText())) {
@@ -336,8 +364,14 @@ public class Controller {
 		gitCommitList.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent event) {
-				String commit = (String)gitCommitList.getSelectedItem();
-				System.out.println(commit);
+				//String commit = (String)gitCommitList.getSelectedItem();
+				//System.out.println(commit);
+				previousSave = mainTextPane.getText();
+				//System.out.println(gitFile.getName());
+				String fileName = gitFile.getName();
+				fileName = fileName.substring(0, fileName.lastIndexOf('.'));
+				System.out.println("fileName: " + fileName);
+				mainTextPane.setText(database.openRetrievedVersion(fileName, previousSave));
 			}
 		});
 
@@ -439,12 +473,12 @@ public class Controller {
 			toDisplay[i+1] = msgToDisplay;
 			commitsToDisplay[i+1] = msgToDisplay;
 			//System.out.println(toDisplay[i]);
-			System.out.println(commitsToDisplay[i]);
+			//System.out.println(commitsToDisplay[i]);
 		}
 		
 		if (gitCommitList != null) {
 			//System.out.println("gitCommitList is not null");
-			gitCommitList.removeAll();
+			//gitCommitList.removeAll();
 		}
 		
 		gitCommitList.setModel(new DefaultComboBoxModel<Object>(commitsToDisplay));

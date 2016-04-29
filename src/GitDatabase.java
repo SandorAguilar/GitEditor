@@ -382,6 +382,7 @@ public class GitDatabase {
 	}
 	
 	public void closeDatabase() {
+
 		if (currentTree == null) {
 			return;
 		}
