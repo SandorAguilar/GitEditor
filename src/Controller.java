@@ -368,10 +368,15 @@ public class Controller {
 				//System.out.println(commit);
 				previousSave = mainTextPane.getText();
 				//System.out.println(gitFile.getName());
+				int returnVal = gitCommitList.getSelectedIndex();
+				long returnLong = database.retrieve().get(returnVal-1).getCommitTime();
+				String stringLong = Long.toString(returnLong);
+				//String longCommit = 
 				String fileName = gitFile.getName();
 				fileName = fileName.substring(0, fileName.lastIndexOf('.'));
 				System.out.println("fileName: " + fileName);
-				mainTextPane.setText(database.openRetrievedVersion(fileName, previousSave));
+				//mainTextPane.setText(database.openRetrievedVersion(fileName, previousSave));
+				mainTextPane.setText(database.openRetrievedVersion(stringLong, previousSave));
 			}
 		});
 
