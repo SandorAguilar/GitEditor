@@ -12,8 +12,10 @@ import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Set;
 
+
 /**
  * Spell check class 
+ * 
  * @author Eitan
  *
  */
@@ -21,14 +23,18 @@ public class SpellChecker {
 	
 	private Path dict_path = Paths.get("/Users/Eitan/Desktop/upenn/cit594/hw6/words.txt");
 	private Set<String> dict;
-	private int numSuggestions = 3;
+	private int numSuggestions = 4;
 	
-	public static void main(String[] args){
-		SpellChecker sc = new SpellChecker();
-		String x = "So this cd is a HUGE paragrph with .all sorts abb of valid and glasses invalid words. \"SO exciting\" one may, or may not, say.";
-		System.out.println(sc.checkDocument(x));
-		sc.recommendedWords("hl");
-	}
+//	public static void main(String[] args){
+//		SpellChecker sc = new SpellChecker();
+//		String x = "So this cd is a HUGE paragrph with .all sorts abb of valid and glasses invalid words. \"SO exciting\" one may, or may not, say.";
+//		System.out.println(sc.checkDocument(x));
+//		for (String s : sc.checkDocument(x)){
+//			System.out.println(s + ": " + sc.recommendedWords(s));
+//			
+//		}
+//		sc.recommendedWords("aria");
+//	}
 	
 	/**
 	 * Constructor
@@ -38,10 +44,6 @@ public class SpellChecker {
 		readDict();
 	}
 	
-	private static int editDistance(String word1, String word2){
-//		TODO implement method
-		return (word2.length() + 5);
-	}
 	
 	/**
 	 * Returns the top numSuggestions closest words to the wrong word 
@@ -61,7 +63,7 @@ public class SpellChecker {
 			
 			if (minHeap.peek().getValue() == 1 && minHeap.size() == numSuggestions) break;
 			
-			int val = editDistance(wrongWord, w);
+			int val = EditDistance.calcDistance(wrongWord, w);
 			
 			if (minHeap.size() < numSuggestions){
 				minHeap.add(new Tuple(w, val));
@@ -108,9 +110,6 @@ public class SpellChecker {
 	 * @return
 	 */
 	public boolean checkWord(String word){
-//		TODO strips s at end (words => word)
-		
-//		TODO strip 's at end 
 //		strip punctuation from beginning of string
 		word = word.replaceFirst("^[^a-zA-Z]+", "");
 //		strip punctuation from end of string
