@@ -213,7 +213,11 @@ public class GitDatabase {
 	 * @param fileName
 	 */
 	public String openRetrievedVersion (String storedFileTime, String previousFileContent) {
-		save (previousFileContent, "Saved before opening a retrieved version.");
+		String fileContent = getFileContent (currentNode.getFile());
+		if (!fileContent.equals(previousFileContent)) {
+			save (previousFileContent, "Saved before opening a retrieved version.");
+		}
+		
 		File retrievedFile = new File (gitDatabasePath + "/" + storedFileTime);
 		System.out.println("The retrieved file path is:" + retrievedFile.getPath());
 		FileNode retrievedNode = currentTree.findNode(retrievedFile.getPath());
