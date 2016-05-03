@@ -25,7 +25,7 @@ import java.util.Set;
  */
 public class SpellChecker {
 	
-	private Path dict_path = Paths.get("/Users/Eitan/Desktop/upenn/cit594/hw6/words.txt");
+	private Path dict_path = Paths.get("words.txt");
 	private Set<String> dict;
 	private int numSuggestions = 10;
 	
