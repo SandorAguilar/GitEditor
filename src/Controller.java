@@ -15,6 +15,8 @@ import java.text.Format;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import javax.swing.DefaultComboBoxModel;
@@ -80,6 +82,8 @@ public class Controller {
 	
 	private JComboBox<Object> gitCommitList;
 	
+	private SpellChecker spellCheck;
+	
 	GitDatabase database;
 
 
@@ -113,6 +117,8 @@ public class Controller {
 		if (!file.exists()) {
 			file.mkdir();     
         }
+		//initialize spellchecker
+		spellCheck = new SpellChecker();
 	}
 
 	/**
@@ -384,6 +390,10 @@ public class Controller {
 			@Override
 			public void actionPerformed(ActionEvent event) {
 				// TODO
+				String txt = mainTextPane.getText();
+				List<Map<String, List<String>>> wrongWordsSuggestions = spellCheck.wrongWordsSuggestions(txt);
+				String suggestionsToReturn = SpellChecker.suggestionsRepresentation(wrongWordsSuggestions);
+				spellCheckPane.setText(suggestionsToReturn);
 			}
 		});
 	}

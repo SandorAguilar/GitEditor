@@ -7,8 +7,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Set;
 
@@ -23,7 +27,7 @@ public class SpellChecker {
 	
 	private Path dict_path = Paths.get("/Users/Eitan/Desktop/upenn/cit594/hw6/words.txt");
 	private Set<String> dict;
-	private int numSuggestions = 4;
+	private int numSuggestions = 10;
 	
 //	public static void main(String[] args){
 //		SpellChecker sc = new SpellChecker();
@@ -76,11 +80,18 @@ public class SpellChecker {
 			}
 		}
 		
-		System.out.println(minHeap);
-		for (Tuple t : minHeap){
+		Object[] objs = minHeap.toArray();
+		Tuple[] tups = new Tuple[objs.length];
+		for (int i = 0; i < objs.length; i++){
+			tups[i] = (Tuple)objs[i];
+		}
+		Arrays.sort(tups, Collections.reverseOrder());
+
+		for (Tuple t : tups){
 			suggestions.add(t.getStr());
 		}
 		return suggestions;
+		
 	}
 	
 	
@@ -93,14 +104,30 @@ public class SpellChecker {
 	 * @return
 	 */
 	public List<String> checkDocument(String doc){
-		List<String> wrong_words = new ArrayList<String>();
+		List<String> wrongWords = new ArrayList<String>();
 		doc = doc.trim();
 		String[] words = doc.split("\\s+");
 		for (String w : words){
 			if (!checkWord(w))
-				wrong_words.add(w);
+				wrongWords.add(w);
 		}
-		return wrong_words;
+		return wrongWords;
+	}
+	
+	/**
+	 * Returns list of mappings of wrong words to a list of their suggested words 
+	 * @param docText
+	 * @return suggestions
+	 */
+	public List<Map<String, List<String>>> wrongWordsSuggestions(String docText){
+		List<String> wrongWords = checkDocument(docText);
+		List<Map<String, List<String>>> suggestions = new ArrayList<Map<String, List<String>>>();
+		for (String w : wrongWords){
+			Map<String, List<String>> m = new HashMap<String, List<String>>();
+			m.put(w, recommendedWords(w));
+			suggestions.add(m);
+		}
+		return (suggestions);
 	}
 	
 	/**
@@ -127,6 +154,19 @@ public class SpellChecker {
 		}
 		return false;
 	}
+	
+	public static String suggestionsRepresentation(List<Map<String, List<String>>> suggestions){
+		if (suggestions.isEmpty()) return ("No errors! (that we know of...)");
+		StringBuilder sb = new StringBuilder();
+		for (Map<String, List<String>> m : suggestions){
+			String word = (String)m.keySet().toArray()[0];
+			sb.append("Suggestions for misspelled word (" + word + "): ");
+			sb.append(m.get(word).toString());
+			sb.append("\n");
+		}
+		return sb.toString();
+	}
+	
 	
 	/**
 	 * Reads in dictionary from specified path
