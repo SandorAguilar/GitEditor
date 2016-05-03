@@ -7,7 +7,9 @@ Project Description:
 message. You can choose to pull up previously saved versions of 
 your file. The previously saved versions are displayed with their
 commit messages. An additional feature of our text editor is 
-spell-check. You press the "
+spell-check. You press the "spell check" button on the bottom
+and it displays the misspelled words in the file, together with
+10 suggested words for each of them.
 
 Breakdown:
 Sandor - GUI
@@ -22,7 +24,7 @@ Project Used:
 		Tree (MyFileTree.java)
 	- Java Graphics:
 		Controller.java
-	- Formal design:
+	- Interfaces:
 		TODO
 	- Design patterns:
 		Singleton (GitDatabase.java)
