@@ -1,0 +1,30 @@
+Github link:
+https://github.com/cit-upenn/594-s16-project-giteditor
+
+Project Description:
+	We built a text editor that allows users to create and save
+.txt files. When you save a file, you save it with a commit 
+message. You can choose to pull up previously saved versions of 
+your file. The previously saved versions are displayed with their
+commit messages. An additional feature of our text editor is 
+spell-check. You press the "
+
+Breakdown:
+Sandor - GUI
+Felicia - Git style version control
+Eitan - Spell-check
+
+Project Used:
+	- Data structures and (some) of the files they were used in: 
+		HashMap (SpellChecker.java)
+		ArrayList (SpellChecker.java)
+		PriorityQueue as max-heap (SpellChecker.java)
+		Tree (MyFileTree.java)
+	- Java Graphics:
+		Controller.java
+	- Formal design:
+		TODO
+	- Design patterns:
+		Singleton (GitDatabase.java)
+		MVC (with Controller.java being both view and controller)
+		Big ball of mud (just kidding!!!)
