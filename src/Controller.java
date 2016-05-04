@@ -2,6 +2,7 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridLayout;
+import java.util.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
@@ -15,7 +16,6 @@ import java.text.Format;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -83,9 +83,9 @@ public class Controller {
 	private JComboBox<Object> gitCommitList;
 	
 	private SpellChecker spellCheck;
-	
 	GitDatabase database;
 
+	
 
 	/**
 	 * Starts the application.
@@ -198,6 +198,8 @@ public class Controller {
 		spellCheckPane = new JTextPane();
 
 		spellCheckPane.setPreferredSize(new Dimension(100,100));
+		
+		spellCheckPane.setEditable(false);
 
 		mainTextPane.setEditable(true);
 
@@ -282,6 +284,17 @@ public class Controller {
 						workingFile = file.getAbsoluteFile();
 						gitFile = new File(gitPath + "//" + fileChooser.getSelectedFile().getName());
 						previousSave = mainTextPane.getText();
+						//updateArrayListToArray(database.retrieve());
+						String fileName = gitFile.getName();
+						fileName = fileName.substring(0, fileName.lastIndexOf('.'));
+						if (!database.retrieveFileRecordsFromDatabase(fileName, mainTextPane.getText())) {
+							System.out.println("FILE NAME IN OPEN: " + file.getName());
+							
+							database.createNewFile(fileName, mainTextPane.getText());
+							updateArrayListToArray(database.retrieve());
+						} else {
+							updateArrayListToArray(database.retrieve());
+						}
 					}
 				} catch (Exception e) {
 					
@@ -375,21 +388,23 @@ public class Controller {
 				previousSave = mainTextPane.getText();
 				//System.out.println(gitFile.getName());
 				int returnVal = gitCommitList.getSelectedIndex();
-				long returnLong = database.retrieve().get(returnVal-1).getCommitTime();
-				String stringLong = Long.toString(returnLong);
-				//String longCommit = 
-				String fileName = gitFile.getName();
-				fileName = fileName.substring(0, fileName.lastIndexOf('.'));
-				System.out.println("fileName: " + fileName);
-				//mainTextPane.setText(database.openRetrievedVersion(fileName, previousSave));
-				mainTextPane.setText(database.openRetrievedVersion(stringLong, previousSave));
+				if (returnVal != 0) {
+					long returnLong = database.retrieve().get(returnVal-1).getCommitTime();
+					
+					String stringLong = Long.toString(returnLong);
+					//String longCommit = 
+					String fileName = gitFile.getName();
+					fileName = fileName.substring(0, fileName.lastIndexOf('.'));
+					System.out.println("fileName: " + fileName + "longTime: " + stringLong);
+					//mainTextPane.setText(database.openRetrievedVersion(fileName, previousSave));
+					mainTextPane.setText(database.openRetrievedVersion(stringLong, previousSave));
+				}
 			}
 		});
 
 		spellCheckButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent event) {
-				// TODO
 				String txt = mainTextPane.getText();
 				List<Map<String, List<String>>> wrongWordsSuggestions = spellCheck.wrongWordsSuggestions(txt);
 				String suggestionsToReturn = SpellChecker.suggestionsRepresentation(wrongWordsSuggestions);
@@ -467,6 +482,12 @@ public class Controller {
 	    return format.format(date);
 	}
 	
+	
+	/**
+	 * Converts ArrayList to Array for populate the drop down menu for
+	 * retrieving previous commits. 
+	 * @param commit from the git database
+	 */
 	public void updateArrayListToArray(ArrayList<Commit> commit) {
 		//System.out.println("commit size: " + commit.size());
 		if(toDisplay != null) {

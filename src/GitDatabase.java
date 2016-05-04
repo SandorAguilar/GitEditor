@@ -181,7 +181,7 @@ public class GitDatabase {
 				File currentVersionFile = fileCurrentNode.getFile();
 				String currentStoredContent = getFileContent (currentVersionFile);
 				if (!currentStoredContent.equals(content)) {
-					save (content, "Reopened after modifying");
+					save (content, "Reopeneding");
 				}
 				return true;
 			}
@@ -213,11 +213,16 @@ public class GitDatabase {
 	 * @param fileName
 	 */
 	public String openRetrievedVersion (String storedFileTime, String previousFileContent) {
-		String fileContent = getFileContent (currentNode.getFile());
-		if (!fileContent.equals(previousFileContent)) {
-			save (previousFileContent, "Saved before opening a retrieved version.");
-		}
-		
+//		if (currentNode == null) {
+//			save (previousFileContent, "Saved before opening a retrieved version.");
+//		} else {
+//			String fileContent = getFileContent (currentNode.getFile());
+//			if (!fileContent.equals(previousFileContent)) {
+//				save (previousFileContent, "Saved before opening a retrieved version.");
+//			}
+//		
+//		}
+			
 		File retrievedFile = new File (gitDatabasePath + "/" + storedFileTime);
 		System.out.println("The retrieved file path is:" + retrievedFile.getPath());
 		FileNode retrievedNode = currentTree.findNode(retrievedFile.getPath());

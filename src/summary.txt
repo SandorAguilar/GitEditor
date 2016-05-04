@@ -1,3 +1,5 @@
+To run program, run main in Controller.java
+
 Github link:
 https://github.com/cit-upenn/594-s16-project-giteditor
 
@@ -30,3 +32,16 @@ Project Used:
 		Singleton (GitDatabase.java)
 		MVC (with Controller.java being both view and controller)
 		Big ball of mud (just kidding!!!)
+
+		
+Java Graphics:
+        Java swing was incorporated for the windowing. The main layout, frame,
+        is a BorderLayout that incorporates a GridLayout, menuPanel,
+        and BorderLayout, spellCheckPanel that are added to frame on the NORTH and      SOUTH respectively.
+
+        Both the mainTextPane and the spellCheckPane have scrollbars implemented.
+
+        The entire swing component is handled through a thread in order to
+        let the window components still be functional if a task in the background
+        takes a while to run or something gets hung up.
+		
