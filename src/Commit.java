@@ -1,4 +1,9 @@
 
+/**
+ * This is a wrapper class that wraps the commitTime and commitMessage for a file.
+ * @author fanglinlu
+ *
+ */
 public class Commit {
 	
 	private long commitTime;

@@ -1,6 +1,10 @@
 import java.io.File;
 import java.util.ArrayList;
-
+/**
+ * This is a FileNade class that represents each saved file in the database.
+ * @author fanglinlu
+ *
+ */
 public class FileNode {
 	private File file;
 	private FileNode parent;
@@ -11,6 +15,7 @@ public class FileNode {
 		this.file = file;
 		children = new ArrayList<FileNode> ();
 	}
+	
 	public File getFile() {
 		return file;
 	}

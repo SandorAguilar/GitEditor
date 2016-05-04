@@ -1,0 +1,51 @@
+To run program, run main in Controller.java
+
+Github link:
+https://github.com/cit-upenn/594-s16-project-giteditor
+
+Project Description:
+	We built a text editor that allows users to create and save
+.txt files. When you save a file, you save it with a commit 
+message. You can choose to pull up previously saved versions of 
+your file. The previously saved versions are displayed with their
+commit messages. 
+	An additional feature of our text editor is spell-check. You 
+press the "spell check" button on the bottom and it displays the 
+misspelled words in the file, together with 10 suggested words for 
+each of them. The dictionary we used is the file located in unix 
+computers at /usr/share/dict/words, which we copied into words.txt. 
+
+Breakdown:
+Sandor - GUI
+Felicia - Git style version control
+Eitan - Spell-check
+
+Project Used:
+	- Data structures and (some) of the files they were used in: 
+		HashMap (SpellChecker.java)
+		ArrayList (SpellChecker.java, FileNode.java, GitDatabase.java)
+		PriorityQueue as max-heap (SpellChecker.java, GitDababase.java)
+		Tree (MyFileTree.java)
+	- Java Graphics:
+		Controller.java
+	- Interfaces:
+		SpellCheckInterface
+		GitDatabaseInterface
+	- Design patterns:
+		Singleton (GitDatabase.java)
+		MVC (with Controller.java being both view and controller)
+		Big ball of mud (just kidding!!!)
+
+		
+Java Graphics:
+        Java swing was incorporated for the windowing. The main layout, frame,
+        is a BorderLayout that incorporates a GridLayout, menuPanel,
+        and BorderLayout, spellCheckPanel that are added to frame on the NORTH and
+        SOUTH respectively.
+
+        Both the mainTextPane and the spellCheckPane have scrollbars implemented.
+
+        The entire swing component is handled through a thread in order to
+        let the window components still be functional if a task in the background
+        takes a while to run or something gets hung up.
+		

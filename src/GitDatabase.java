@@ -6,8 +6,12 @@ import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.PriorityQueue;
-
-public class GitDatabase {
+/**
+ * This is the GitDatabase method that manages all the database related functions
+ * @author fanglinlu
+ *
+ */
+public class GitDatabase implements GitDatabaseInterface{
 	
 	private static GitDatabase database = null;
 	private static ArrayList<MyFileTree> fileTreeData;
@@ -33,11 +37,18 @@ public class GitDatabase {
 		}
 	};
 	
+	/**
+	 * This is the contructor of the database.
+	 */
 	private GitDatabase () {
 		
 	}
 	
-	public static GitDatabase getInstance () {
+	/**
+	 * This method used Singleton desing pattern to get an instance of the GitDatabase.
+	 * @return
+	 */
+	public synchronized static GitDatabase getInstance () {
 		if (database == null) {
 			database = new GitDatabase();
 			init(gitDatabasePath);
@@ -46,6 +57,9 @@ public class GitDatabase {
 		return database;
 	}
 	
+	/**
+	 * This method is used to create a new file in the database.
+	 */
 	public boolean createNewFile (String fileName, String content) {
 		
 		if (!checkFileName(fileName)) {
@@ -88,6 +102,11 @@ public class GitDatabase {
 		
 	}
 	
+	/**
+	 * This method is used to check whether the file name is stored in the database.
+	 * @param fileName
+	 * @return
+	 */
 	private boolean checkFileName (String fileName) {
 		for (MyFileTree mft: fileTreeData) {
 			if (mft.getFileName().equals(fileName)) {
@@ -98,6 +117,10 @@ public class GitDatabase {
 		return true;
 	}
 	
+	/**
+	 * This method is used to update tree records in the database.
+	 * @param fileName
+	 */
 	private void updateTreeRecords (String fileName) {
 		String fileStoredPath = gitDatabasePath + "/" + fileName;
 		try {
@@ -116,6 +139,12 @@ public class GitDatabase {
 		
 	}
 	
+	/**
+	 * This method is used to write the file node records in the database.
+	 * @param bw
+	 * @param fileNode
+	 * @throws Exception
+	 */
 	private void writeNodeRecords (BufferedWriter bw, FileNode fileNode) throws Exception{
 		
 		bw.write(fileNode.getFile().getPath() + ";");
@@ -133,6 +162,9 @@ public class GitDatabase {
 		
 	}
 	
+	/**
+	 * This method is called when you want to save the file.
+	 */
 	public void save (String content, String commitMessage) {
 		
 		String fileStoredName = System.currentTimeMillis() + "";
@@ -143,7 +175,7 @@ public class GitDatabase {
 		
 		newFileNode.setParent(currentNode);
 		newFileNode.setCommitMessage(commitMessage);
-		System.out.println("Set commit message:" + commitMessage);
+//		System.out.println("Set commit message:" + commitMessage);
 		
 		currentNode.addChildren(newFileNode);
 		
@@ -213,33 +245,27 @@ public class GitDatabase {
 	 * @param fileName
 	 */
 	public String openRetrievedVersion (String storedFileTime, String previousFileContent) {
-//		if (currentNode == null) {
-//			save (previousFileContent, "Saved before opening a retrieved version.");
-//		} else {
-//			String fileContent = getFileContent (currentNode.getFile());
-//			if (!fileContent.equals(previousFileContent)) {
-//				save (previousFileContent, "Saved before opening a retrieved version.");
-//			}
-//		
-//		}
-			
+
 		File retrievedFile = new File (gitDatabasePath + "/" + storedFileTime);
-		System.out.println("The retrieved file path is:" + retrievedFile.getPath());
+
 		FileNode retrievedNode = currentTree.findNode(retrievedFile.getPath());
 		currentNode = retrievedNode;
-		System.out.println("The current Node is:" + currentNode);
 		currentTree.setCurrentNode(currentNode);
 		
 		return getFileContent (retrievedFile);
 		
 	}
 	
+	/**
+	 * This method is used to add the fileNode to the queue to help with retrireving the most recent commits. 
+	 * @param pq
+	 * @param node
+	 */
 	private void addTreeToQueue (PriorityQueue<Commit> pq, FileNode node) {
 		if (node == null) {
 			return;
 		}
 		
-//		System.out.println(node.getFile().getName());
 		Commit commit = new Commit (Long.parseLong(node.getFile().getName()), node.getCommitMessage());
 		pq.add(commit);
 		
@@ -249,6 +275,11 @@ public class GitDatabase {
 		
 	}
 	
+	/**
+	 * This method is used to get the file content.
+	 * @param file
+	 * @return
+	 */
 	private String getFileContent (File file) {
 		String content = "";
 		try {
@@ -269,6 +300,10 @@ public class GitDatabase {
 		return content;
 	}
 	
+	/**
+	 * This method is used to write the file name to the directory stored in the database.
+	 * @param fileName
+	 */
 	private void writeFileNameToDirectory (String fileName) {
 		try {
 			
@@ -284,6 +319,10 @@ public class GitDatabase {
 		
 	}
 	
+	/**
+	 * This method is called to init the database if it does not exist before. 
+	 * @param gitDatabasePath
+	 */
 	private static void init (String gitDatabasePath) {
 		
 		File homeDirectory = new File (gitDatabasePath);
@@ -306,6 +345,10 @@ public class GitDatabase {
 		}
 	}
 	
+	/**
+	 * This method is called to populate files to the database.
+	 * @param directoryPath
+	 */
 	private static void populateFiles (String directoryPath) {
 		
 		ArrayList<String> storedFiles = new ArrayList<String> ();
@@ -326,9 +369,6 @@ public class GitDatabase {
 		}
 		
 		for (String storedFile: storedFiles) {
-//			String[] storedFileInfo = storedFile.split(":");
-//			String path = ".gitDatabase/" + storedFileInfo[1];
-//			MyFileTree mft = new MyFileTree(storedFileInfo[0]);
 			
 			String path = gitDatabasePath + "/" + storedFile;
 			MyFileTree mft = new MyFileTree(storedFile);
@@ -337,7 +377,11 @@ public class GitDatabase {
 		}	
 		
 	}
-	
+	/**
+	 * This method is called to populate detailed file records to the database.
+	 * @param filePath
+	 * @param mft
+	 */
 	private static void populateData (String filePath, MyFileTree mft) {
 		try {
 			FileReader fileReader = new FileReader (filePath);
@@ -371,7 +415,7 @@ public class GitDatabase {
 				
 				if (lineInfo[3].length() > 0) {
 					fileNode.setCommitMessage(lineInfo[3]);
-					System.out.println("SetCommitMessage:" + lineInfo[3]);
+//					System.out.println("SetCommitMessage:" + lineInfo[3]);
 				}
 				if (lineInfo[4].equals("T")) {
 					mft.setCurrentNode(fileNode);
@@ -390,6 +434,9 @@ public class GitDatabase {
 		}
 	}
 	
+	/**
+	 * This method is called to close the database and stored all the related information to the database.
+	 */
 	public void closeDatabase() {
 
 		if (currentTree == null) {
@@ -410,6 +457,12 @@ public class GitDatabase {
 		}
 	}
 	
+	/**
+	 * This method is called to write the file node information to the file.
+	 * @param bw
+	 * @param node
+	 * @throws Exception
+	 */
 	private void writeNodeToTheFile (BufferedWriter bw, FileNode node) throws Exception{
 		if (node == null) {
 			return;

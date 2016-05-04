@@ -83,7 +83,7 @@ public class Controller {
 	private JComboBox<Object> gitCommitList;
 	
 	private SpellCheckInterface spellCheck;
-	GitDatabase database;
+	GitDatabaseInterface database;
 
 	
 
@@ -232,7 +232,7 @@ public class Controller {
 				if ((isFileAlreadySaved() && !mainTextPane.getText().equals(previousSave))
 						|| (!isFileAlreadySaved() && mainTextPane.getText().length() > 0)) {
 					int returnVal = JOptionPane.showConfirmDialog(frame, "save message before closing?");
-					System.out.println("returnVal: " + returnVal);
+//					System.out.println("returnVal: " + returnVal);
 					if (returnVal == 0) {
 						saveButton.doClick();
 						try {
@@ -288,7 +288,7 @@ public class Controller {
 						String fileName = gitFile.getName();
 						fileName = fileName.substring(0, fileName.lastIndexOf('.'));
 						if (!database.retrieveFileRecordsFromDatabase(fileName, mainTextPane.getText())) {
-							System.out.println("FILE NAME IN OPEN: " + file.getName());
+//							System.out.println("FILE NAME IN OPEN: " + file.getName());
 							
 							database.createNewFile(fileName, mainTextPane.getText());
 							updateArrayListToArray(database.retrieve());
@@ -347,7 +347,7 @@ public class Controller {
 						updateArrayListToArray(database.retrieve());
 						String fileName = gitFile.getName();
 						fileName = fileName.substring(0, fileName.lastIndexOf('.'));
-						System.out.println("fileName when creating: " + fileName);
+//						System.out.println("fileName when creating: " + fileName);
 						database.createNewFile(fileName, mainTextPane.getText());
 					}
 				} else {
@@ -395,7 +395,7 @@ public class Controller {
 					//String longCommit = 
 					String fileName = gitFile.getName();
 					fileName = fileName.substring(0, fileName.lastIndexOf('.'));
-					System.out.println("fileName: " + fileName + "longTime: " + stringLong);
+//					System.out.println("fileName: " + fileName + "longTime: " + stringLong);
 					//mainTextPane.setText(database.openRetrievedVersion(fileName, previousSave));
 					mainTextPane.setText(database.openRetrievedVersion(stringLong, previousSave));
 				}
