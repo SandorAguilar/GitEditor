@@ -82,7 +82,7 @@ public class Controller {
 	
 	private JComboBox<Object> gitCommitList;
 	
-	private SpellChecker spellCheck;
+	private SpellCheckInterface spellCheck;
 	GitDatabase database;
 
 	

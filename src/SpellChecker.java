@@ -23,7 +23,7 @@ import java.util.Set;
  * @author Eitan
  *
  */
-public class SpellChecker {
+public class SpellChecker implements SpellCheckInterface{
 	
 	private Path dict_path = Paths.get("words.txt");
 	private Set<String> dict;
@@ -136,7 +136,7 @@ public class SpellChecker {
 	 * @param word
 	 * @return
 	 */
-	public boolean checkWord(String word){
+	private boolean checkWord(String word){
 //		strip punctuation from beginning of string
 		word = word.replaceFirst("^[^a-zA-Z]+", "");
 //		strip punctuation from end of string
@@ -156,6 +156,12 @@ public class SpellChecker {
 		return false;
 	}
 	
+	/**
+	 * Takes in a list of suggestions
+	 * Outputs suggestions in pretty form for user to read
+	 * @param suggestions
+	 * @return
+	 */
 	public static String suggestionsRepresentation(List<Map<String, List<String>>> suggestions){
 		if (suggestions.isEmpty()) return ("No errors! (that we know of...)");
 		StringBuilder sb = new StringBuilder();

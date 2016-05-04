@@ -1,5 +1,5 @@
 /**
- * Edit distance
+ * Edit distance, dynamic programming algorithm
  * Deletion has cost 1, substitution has cost 2 (follows Levenshtein)
  * 
  * @author Eitan

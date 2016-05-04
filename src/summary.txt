@@ -8,10 +8,12 @@ Project Description:
 .txt files. When you save a file, you save it with a commit 
 message. You can choose to pull up previously saved versions of 
 your file. The previously saved versions are displayed with their
-commit messages. An additional feature of our text editor is 
-spell-check. You press the "spell check" button on the bottom
-and it displays the misspelled words in the file, together with
-10 suggested words for each of them.
+commit messages. 
+	An additional feature of our text editor is spell-check. You 
+press the "spell check" button on the bottom and it displays the 
+misspelled words in the file, together with 10 suggested words for 
+each of them. The dictionary we used is the file located in unix 
+computers at /usr/share/dict/words, which we copied into words.txt. 
 
 Breakdown:
 Sandor - GUI
@@ -27,7 +29,8 @@ Project Used:
 	- Java Graphics:
 		Controller.java
 	- Interfaces:
-		TODO
+		SpellCheckInterface
+		GitDatabase interface
 	- Design patterns:
 		Singleton (GitDatabase.java)
 		MVC (with Controller.java being both view and controller)
@@ -37,7 +40,8 @@ Project Used:
 Java Graphics:
         Java swing was incorporated for the windowing. The main layout, frame,
         is a BorderLayout that incorporates a GridLayout, menuPanel,
-        and BorderLayout, spellCheckPanel that are added to frame on the NORTH and      SOUTH respectively.
+        and BorderLayout, spellCheckPanel that are added to frame on the NORTH and
+        SOUTH respectively.
 
         Both the mainTextPane and the spellCheckPane have scrollbars implemented.
 
