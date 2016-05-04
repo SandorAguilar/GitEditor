@@ -143,6 +143,7 @@ public class SpellChecker {
 		word = word.replaceAll("[^a-zA-Z]+$", "");
 		if (dict.contains(word) || dict.contains(word.toLowerCase())) return true;
 		int L = word.length();
+		if (L == 0) return true;
 		if (word.charAt(L - 1) == 's'){
 			word = word.substring(0, L - 1);
 			if (dict.contains(word) || dict.contains(word.toLowerCase())) return true;
